@@ -41,7 +41,7 @@ class ItkAware(MDApp):
 
     def on_start(self):
         self.conn_event = Clock.schedule_once(self.conn_callback, 1/100)
-
+        
     def build(self):
         return Builder.load_file("layout.kv")
 
@@ -51,13 +51,12 @@ class ItkAware(MDApp):
         config.setdefaults('device-log', {'fpath':'log/', 'fname':'aware.log'})
         config.setdefaults('parameters-file', {'name':'aware_cfg', 'ext':'json', 'index':0})
 
-    def callback_2(self):
-        pass
 
     def file_manager_open(self):
         self.file_manager.show('/')  # output manager to the screen
         self.manager_open = True
         #self.root.ids.toolbar.right_action_items[0][0]  = "facebook"
+    
     def select_path(self, path):
         '''It will be called when you click on the file name
         or the catalog selection button.
@@ -97,7 +96,7 @@ class ItkAware(MDApp):
         try:
             if self.conn.open(self.config.get('serial', 'port')):
                 Logger.info( "device open" )
-                #self.ids.info.text = "Conectando" 
+                self.progress_spinner(active = True)
                 return True
         except: pass
         
@@ -106,11 +105,7 @@ class ItkAware(MDApp):
 
     def establish_connection(self):
         self.retry_conn = self.retry_conn + 1
-        
-        #self.ids.progressbar.value = self.retry_conn / 6
-
-        #self.ids.info.text = "Conectando "
-
+ 
         Logger.info( "connecting try %d", self.retry_conn )
         try:
             # desactiva el log para que el consumo de CPU disminuya.
@@ -119,36 +114,44 @@ class ItkAware(MDApp):
                 self.json_fields = self.conn.json_cmd(key="info", value="version")
                 if self.json_fields and ("version" in self.json_fields.keys()):
                     self.firmware_version = self.json_fields["version"]
-                    #self.show_firmware_version()
+                    self.show_firmware_version()
                     self.read_params()
-                    self.root.ids.toolbar.right_action_items.pop()
-                    self.root.ids.toolbar.right_action_items.append(["usb-port", lambda x: None])
+                    self.usb_icon(on_line=True)
+                    
                     Logger.info( "device connected" )
-                   # self.ids.progressbar.value = 1
+
+                    self.progress_spinner(active = False)
+                    
                     return True
         except: pass
         
         return False
 
-    def device_close(self):
-        #self.ids.info.text = "Desconectado" 
-        self.retry_conn = 0
-        #self.ids.progressbar.value = 0
-        
+    def usb_icon(self, on_line):
         item = self.root.ids.toolbar.right_action_items[0][0]
-        if item == "usb-port":
+        icon = "usb-port" if on_line else "ethernet-cable-off"
+        if item != icon:
             self.root.ids.toolbar.right_action_items.pop()
-            self.root.ids.toolbar.right_action_items.append(["ethernet-cable-off", lambda x: None])
+            self.root.ids.toolbar.right_action_items.append([icon, lambda x: None])
+
+    def progress_spinner(self, active):
+        if self.root.ids.spinner_progress.active != active:
+            self.root.ids.spinner_progress.active = active
+
+    def device_close(self):
+        self.retry_conn = 0
+
+        self.progress_spinner(active = False)
+        self.usb_icon(on_line=False)
 
         if self.conn.is_open:
             Logger.info( "device_close" )
-            
                 
         self.conn.close()
     
     def read_params(self):
         if not self.conn.is_open:
-            #MessageBox(caption = "Dispositivo desconectado")
+            toast("Dispositivo desconectado")
             return
    
         # Para evitar incosistencias, invalida los parametros leidos.
@@ -160,6 +163,9 @@ class ItkAware(MDApp):
         self.json_fields.pop('info', None)
         
         if not self.valid_parameters:
-           pass # MessageBox("Problemas leyendo")
+            toast( "Problemas leyendo" )
+    
+    def show_firmware_version(self):
+        toast( "Firmware V" + self.firmware_version )
 
 ItkAware().run()

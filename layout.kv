@@ -78,13 +78,22 @@
 
 Screen:
     toolbar: toolbar.__self__
+    spinner_progress: spinner_progress.__self__
+
     MDToolbar:
         id: toolbar
         pos_hint: {"top": 1}
-        elevation: 10
+        #elevation: 10
         title: "Estado"
         left_action_items: [["menu", lambda x: nav_drawer.set_state("open")]]
-        right_action_items: [["ethernet-cable-off", lambda x: app.callback_2()]]
+        right_action_items: [["ethernet-cable-off", lambda x: None]]
+    
+    MDSpinner:
+        id: spinner_progress
+        size_hint: None, None
+        size: dp(48), dp(48)
+        pos_hint: {'center_x': .5, 'center_y': .5}
+        active: False 
 
     NavigationLayout:
         x: toolbar.height
