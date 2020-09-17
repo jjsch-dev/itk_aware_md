@@ -1,0 +1,136 @@
+<ContentNavigationDrawer>:
+    orientation: "vertical"
+    padding: "8dp"
+    spacing: "8dp"
+
+    AnchorLayout:
+        anchor_x: "left"
+        size_hint_y: None
+        height: avatar.height
+
+        Image:
+            id: avatar
+            size_hint: None, None
+            size: "56dp", "56dp"
+            source: "images/itk_logo_transparent.png"
+
+    MDLabel:
+        text: "Configuración"
+        font_style: "Button"
+        size_hint_y: None
+        height: self.texture_size[1]
+
+    # MDLabel:
+    #     text: "kivydevelopment@gmail.com"
+    #     font_style: "Caption"
+    #     size_hint_y: None
+    #     height: self.texture_size[1]
+
+    ScrollView:
+
+        MDList:
+
+            OneLineIconListItem:
+                text: "Abrir archivo"
+                on_press:
+                    root.nav_drawer.set_state("close")
+                    root.screen_manager.current = "open_file"
+                    root.toolbar.title = self.text
+                    app.file_manager_open()
+                IconLeftWidget:
+                    icon: "file-download"
+            
+            OneLineIconListItem:
+                text: "Salvar archivo"
+                on_press: 
+                    root.nav_drawer.set_state("close")
+                    root.screen_manager.current = "save_file"
+                    root.toolbar.title = self.text
+                IconLeftWidget:
+                    icon: "file-upload"
+
+            OneLineIconListItem:
+                text: "Iluminación"
+                on_press: 
+                    root.nav_drawer.set_state("close")
+                    root.screen_manager.current = "leds"
+                    root.toolbar.title = self.text
+                IconLeftWidget:
+                    icon: "led-on"
+
+            OneLineIconListItem:
+                text: "Zona"
+                on_press: 
+                    root.nav_drawer.set_state("close")
+                    root.screen_manager.current = "distance"
+                    root.toolbar.title = self.text
+                IconLeftWidget:
+                    icon: "ruler"
+            
+            OneLineIconListItem:
+                text: "Sonido"
+                on_press: 
+                    root.nav_drawer.set_state("close")
+                    root.screen_manager.current = "buzzer"
+                    root.toolbar.title = self.text
+                IconLeftWidget:
+                    icon: "volume-high"
+
+Screen:
+    toolbar: toolbar.__self__
+    MDToolbar:
+        id: toolbar
+        pos_hint: {"top": 1}
+        elevation: 10
+        title: "Estado"
+        left_action_items: [["menu", lambda x: nav_drawer.set_state("open")]]
+        right_action_items: [["ethernet-cable-off", lambda x: app.callback_2()]]
+
+    NavigationLayout:
+        x: toolbar.height
+
+        ScreenManager:
+            id: screen_manager
+
+            Screen:
+                name: "open_file"
+
+                MDLabel:
+                    text: "Abrir archivo"
+                    halign: "center"
+
+            Screen:
+                name: "save_file"
+
+                MDLabel:
+                    text: "Salvar archivo"
+                    halign: "center"
+
+            Screen:
+                name: "leds"
+
+                MDLabel:
+                    text: "Iluminación"
+                    halign: "center"
+            
+            Screen:
+                name: "distance"
+
+                MDLabel:
+                    text: "Zonas"
+                    halign: "center"
+            
+            Screen:
+                name: "buzzer"
+
+                MDLabel:
+                    text: "sonido"
+                    halign: "center"
+
+        MDNavigationDrawer:
+            id: nav_drawer
+
+            ContentNavigationDrawer:
+                screen_manager: screen_manager
+                nav_drawer: nav_drawer
+                toolbar: toolbar
