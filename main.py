@@ -63,10 +63,11 @@ class ItkAware(MDApp):
 
 
     def file_manager_open(self):
-        self.file_manager.show('/')  # output manager to the screen
+        self.file_manager.ext.clear()
+        self.file_manager.ext.append(".json")
+        self.file_manager.show('/home/jjsch/Desktop')  # output manager to the screen
         self.manager_open = True
-        #self.root.ids.toolbar.right_action_items[0][0]  = "facebook"
-    
+            
     def select_path(self, path):
         '''It will be called when you click on the file name
         or the catalog selection button.
@@ -74,9 +75,37 @@ class ItkAware(MDApp):
         :type path: str;
         :param path: path to the selected directory or file;
         '''
-
+        self.path = path
         self.exit_manager()
-        toast(path)
+        self.show_alert_open_file()
+              
+    def show_alert_open_file(self):
+        if not self.dialog:
+            self.dialog = MDDialog(
+                title="Cargar archivo",
+                text="Esta seguro que desea actualizar el equipo?",
+                buttons=[
+                    
+                    MDFlatButton(
+                        text="Cancelar", 
+                        text_color=self.theme_cls.primary_color, 
+                        on_release= self.close_alert_open_file
+                    ),
+                    MDRaisedButton(               
+                        text="Aceptar", 
+                        text_color=self.theme_cls.primary_color,
+                        on_release=self.send_file
+                    ),
+                ],
+            )
+        self.dialog.set_normal_height()
+        self.dialog.open()
+    
+    def close_alert_open_file(self, inst):
+        self.dialog.dismiss()
+
+    def send_file(self, inst):
+        self.dialog.dismiss()
 
     def exit_manager(self, *args):
         '''Called when the user reaches the root of the directory tree.'''
@@ -346,7 +375,7 @@ class ItkAware(MDApp):
 
     def on_load_default(self, inst):
         self.dialog.dismiss()
-        
+
         if not self.conn.is_open: 
             toast("Dispositivo desconectado")
             return
