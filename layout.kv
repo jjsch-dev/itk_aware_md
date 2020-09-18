@@ -2,7 +2,7 @@
     orientation: "vertical"
     padding: "8dp"
     spacing: "8dp"
-
+    
     AnchorLayout:
         anchor_x: "left"
         size_hint_y: None
@@ -19,12 +19,6 @@
         font_style: "Button"
         size_hint_y: None
         height: self.texture_size[1]
-
-    # MDLabel:
-    #     text: "kivydevelopment@gmail.com"
-    #     font_style: "Caption"
-    #     size_hint_y: None
-    #     height: self.texture_size[1]
 
     ScrollView:
 
@@ -77,13 +71,15 @@
                     icon: "volume-high"
 
 Screen:
-    toolbar: toolbar.__self__
-    spinner_progress: spinner_progress.__self__
-
+    #toolbar: toolbar.__self__
+    #spinner_progress: spinner_progress.__self__
+    #buzzer: buzzer.__self__
+    #container_buzzer: container_buzzer.__self__
+    #icon_buzzer: icon_buzzer.__self__
     MDToolbar:
         id: toolbar
         pos_hint: {"top": 1}
-        #elevation: 10
+        elevation: 10
         title: "Estado"
         left_action_items: [["menu", lambda x: nav_drawer.set_state("open")]]
         right_action_items: [["ethernet-cable-off", lambda x: None]]
@@ -124,22 +120,153 @@ Screen:
             
             Screen:
                 name: "distance"
-
-                MDLabel:
-                    text: "Zonas"
-                    halign: "center"
+                MDBoxLayout:
+                    padding:20
+                    spacing: 10
+                    orientation: 'vertical'   
+                    MDCard:
+                        orientation: "vertical"
+                        padding: "8dp"
+                        size_hint: None, None
+                        size: "280dp", "120dp"
+                        pos_hint: {"center_x": .5, "center_y": .5}
+                        MDLabel:
+                            text: "Peligro"
+                            theme_text_color: "Secondary"
+                            size_hint_y: None
+                            height: self.texture_size[1]
+                        MDSeparator:
+                            height: "1dp"
+                        MDLabel:
+                            text: "Distancia en mm"
+                        MDTextField:
+                            id: point_danger
+                            text: "800"
+                    MDCard:
+                        orientation: "vertical"
+                        padding: "8dp"
+                        size_hint: None, None
+                        size: "280dp", "120dp"
+                        pos_hint: {"center_x": .5, "center_y": .5}
+                        MDLabel:
+                            text: "Precaución"
+                            theme_text_color: "Secondary"
+                            size_hint_y: None
+                            height: self.texture_size[1]
+                        MDSeparator:
+                            height: "1dp"
+                        MDLabel:
+                            text: "Distancia en mm"
+                        MDTextField:
+                            id: point_warning
+                            text: "1000"
+                    MDCard:
+                        orientation: "vertical"
+                        padding: "8dp"
+                        size_hint: None, None
+                        size: "280dp", "120dp"
+                        pos_hint: {"center_x": .5, "center_y": .5}
+                        MDLabel:
+                            text: "Seguro"
+                            theme_text_color: "Secondary"
+                            size_hint_y: None
+                            height: self.texture_size[1]
+                        MDSeparator:
+                            height: "1dp"
+                        MDLabel:
+                            text: "Distancia en mm"
+                        MDTextField:
+                            id: point_safe
+                            text: "1200"
+                    MDCard:
+                        orientation: "vertical"
+                        padding: "8dp"
+                        size_hint: None, None
+                        size: "280dp", "120dp"
+                        pos_hint: {"center_x": .5, "center_y": .5}
+                        MDLabel:
+                            text: "Histerisis"
+                            theme_text_color: "Secondary"
+                            size_hint_y: None
+                            height: self.texture_size[1]
+                        MDSeparator:
+                            height: "1dp"
+                        MDLabel:
+                            text: "Distancia en mm"
+                        MDTextField:
+                            id: hysterisis
+                            text: "100"
             
             Screen:
                 name: "buzzer"
-
-                MDLabel:
-                    text: "sonido"
-                    halign: "center"
+                MDBoxLayout:
+                    padding:20
+                    spacing: 10
+                    orientation: 'vertical'   
+                    #halign: "center"    
+                    MDCard:
+                        orientation: "vertical"
+                        padding: "8dp"
+                        size_hint: None, None
+                        size: "280dp", "150dp"
+                        pos_hint: {"center_x": .5, "center_y": .5}
+                        MDLabel:
+                            text: "Buzzer"
+                            theme_text_color: "Secondary"
+                            size_hint_y: None
+                            height: self.texture_size[1]
+                        MDSeparator:
+                            height: "1dp"
+                        MDLabel:
+                            text: "Activa el buzzer"
+                        MDCheckbox:
+                            id: buzzer_enable
+                    MDCard:
+                        orientation: "vertical"
+                        padding: "8dp"
+                        size_hint: None, None
+                        size: "280dp", "150dp"
+                        pos_hint: {"center_x": .5, "center_y": .5}    
+                        MDLabel:
+                            text: "Emisión"
+                            theme_text_color: "Secondary"
+                            size_hint_y: None
+                            height: self.texture_size[1]
+                        MDSeparator:
+                            height: "1dp"
+                        MDLabel:
+                            text: "Duración en mS"
+                        MDTextField:
+                            id: buzzer_ton
+                            text: "100"
+                    MDCard:
+                        orientation: "vertical"
+                        padding: "8dp"
+                        size_hint: None, None
+                        size: "280dp", "150dp"
+                        pos_hint: {"center_x": .5, "center_y": .5}
+                        MDLabel:
+                            text: "Pausa"
+                            theme_text_color: "Secondary"
+                            size_hint_y: None
+                            height: self.texture_size[1]
+                        MDSeparator:
+                            height: "1dp"
+                        MDLabel:
+                            text: "Duración en mS"
+                        MDTextField:
+                            id: buzzer_toff
+                            text: "2000"
 
         MDNavigationDrawer:
             id: nav_drawer
 
             ContentNavigationDrawer:
-                screen_manager: screen_manager
-                nav_drawer: nav_drawer
-                toolbar: toolbar
+                screen_manager: screen_manager.__self__
+                nav_drawer: nav_drawer.__self__
+                toolbar: toolbar.__self__
+                #toolbar: toolbar.__self__
+                #spinner_progress: spinner_progress.__self__
+                #buzzer: buzzer
+                #container_buzzer: container_buzzer
+                #icon_buzzer: icon_buzzer

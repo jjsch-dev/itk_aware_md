@@ -118,7 +118,7 @@ class SerialDevice():
     @property
     def is_open(self):
         try:
-            return self.device.is_open
+            return self.device and self.device.is_open
         except:
             return False
 

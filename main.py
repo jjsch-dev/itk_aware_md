@@ -24,6 +24,10 @@ class ContentNavigationDrawer(BoxLayout):
     screen_manager = ObjectProperty()
     nav_drawer = ObjectProperty()
 
+#class RightCheckbox(IRightBodyTouch, MDCheckbox):
+    '''Custom right container.'''
+  #  pass
+
 class ItkAware(MDApp):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
