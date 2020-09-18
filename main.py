@@ -15,6 +15,8 @@ from kivy import utils
 from kivymd.app import MDApp
 from kivymd.uix.filemanager import MDFileManager
 from kivymd.toast import toast
+from kivymd.uix.button import MDFlatButton, MDRaisedButton
+from kivymd.uix.dialog import MDDialog
 
 from serial_device import SerialDevice
 import json
@@ -41,6 +43,7 @@ class ItkAware(MDApp):
         self.manager_open = False
         self.write_ok_event = None
         self.save_params_event = None
+        self.dialog = None
         self.file_manager = MDFileManager(
            exit_manager=self.exit_manager,
            select_path=self.select_path,
@@ -218,8 +221,8 @@ class ItkAware(MDApp):
         item = self.root.ids.toolbar.right_action_items[0][0]
         icon = "usb-port" if on_line else "ethernet-cable-off"
         if item != icon:
-            self.root.ids.toolbar.right_action_items.pop()
-            self.root.ids.toolbar.right_action_items.append([icon, lambda x: None])
+            self.root.ids.toolbar.right_action_items.pop(0)
+            self.root.ids.toolbar.right_action_items.insert(0, [icon, lambda x: None])
 
     def progress_spinner(self, active):
         if self.root.ids.spinner_progress.active != active:
@@ -315,5 +318,63 @@ class ItkAware(MDApp):
 
     def show_firmware_version(self):
         toast( "Firmware V" + self.firmware_version )
+    
+    def show_alert_factory_reset(self):
+        if not self.dialog:
+            self.dialog = MDDialog(
+                title="Resetear a fabrica?",
+                text="Se cargaran en el dispositivo los valores de fabrica.",
+                buttons=[
+                    
+                    MDFlatButton(
+                        text="Cancelar", 
+                        text_color=self.theme_cls.primary_color, 
+                        on_release= self.close_alert_factory
+                    ),
+                    MDRaisedButton(               
+                        text="Aceptar", 
+                        text_color=self.theme_cls.primary_color,
+                        on_release=self.on_load_default
+                    ),
+                ],
+            )
+        self.dialog.set_normal_height()
+        self.dialog.open()
+    
+    def close_alert_factory(self, inst):
+        self.dialog.dismiss()
+
+    def on_load_default(self, inst):
+        self.dialog.dismiss()
+        
+        if not self.conn.is_open: 
+            toast("Dispositivo desconectado")
+            return
+
+        if self.json_fields:
+            self.json_fields.clear()
+
+        data = {}
+        data["buzzer"] = False
+        data["buzzer_ton"] = 200
+        data["buzzer_toff"] = 2000
+        data["point_danger"] = 800
+        data["point_warning"] = 1000
+        data["point_safe"] = 1200
+        data["color_danger"] = 0xFF0000
+        data["color_warning"] = 0x00FFFF00
+        data["color_safe"] = 0xFF00
+        data["ewma_alpha"] = 0.1
+        data["hysterisis"] = 100
+        data["time_state"] = 1000
+        data["log_level"] = 0
+
+        line = json.dumps(data)
+        # Es una forma simple de convertir los false a False de Python 
+        self.json_fields = json.loads( line )
+        self.set_fields()
+
+        self.write_params()
+
 
 ItkAware().run()
