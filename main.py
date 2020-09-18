@@ -17,10 +17,13 @@ from kivymd.uix.filemanager import MDFileManager
 from kivymd.toast import toast
 
 from serial_device import SerialDevice
+import json
 
 DEVICE_CLOSE = 0
 DEVICE_CONNECTING = 1
 DEVICE_CONNECTED = 2
+
+from functools import partial
 
 class ContentNavigationDrawer(BoxLayout):
     screen_manager = ObjectProperty()
@@ -36,6 +39,8 @@ class ItkAware(MDApp):
         self.conn_state = DEVICE_CLOSE
        # Window.bind(on_keyboard=self.events)
         self.manager_open = False
+        self.write_ok_event = None
+        self.save_params_event = None
         self.file_manager = MDFileManager(
            exit_manager=self.exit_manager,
            select_path=self.select_path,
@@ -247,6 +252,67 @@ class ItkAware(MDApp):
         if not self.valid_parameters:
             toast( "Problemas leyendo" )
     
+    def write_ok_callback(self, obj):
+        self.progress_spinner(active=False)
+        toast("actualizado")
+
+    def save_params_callback(self, data, *largs):
+        if self.conn.is_open:
+            data_json = json.dumps(data)
+            if not self.conn.send_cmd(data_json) :
+                toast("Problemas grabando")
+            else:
+                self.json_fields = data
+                self.valid_parameters = True
+                 
+                self.write_ok_event = Clock.schedule_once(self.write_ok_callback, 1) 
+        else:
+            toast("Dispositivo desconectado")
+
+    def write_params(self):
+        if self.save_params_event:
+            self.save_params_event.cancel()
+       
+        if self.write_ok_event:
+            self.write_ok_event.cancel()
+
+        self.progress_spinner(active=True)
+
+        data = {}
+        try:
+            data["buzzer"] = self.root.ids.buzzer_enable.active
+            data["buzzer_ton"] = int(self.root.ids.buzzer_ton.text)
+            data["buzzer_toff"] = int(self.root.ids.buzzer_toff.text)
+            data["point_danger"] = int(self.root.ids.point_danger.text)
+            data["point_warning"] = int(self.root.ids.point_warning.text)
+            data["point_safe"] = int(self.root.ids.point_safe.text)
+            data["color_danger"] = self.color_to_int(self.root.ids.color_danger.color)
+            data["color_warning"] = self.color_to_int(self.root.ids.color_warning.color)
+            data["color_safe"] = self.color_to_int(self.root.ids.color_safe.color)
+            data["ewma_alpha"] = float(self.root.ids.ewma_alpha.text) 
+            data["hysterisis"] = int(self.root.ids.hysterisis.text)
+            data["time_state"] = int(self.root.ids.time_state.text)
+            data["log_level"] = 0
+        except:
+            toast("Parámetros fuera de rango")
+            return
+
+        #if self.ids.point_danger.min_value > data["point_danger" ] < self.ids.point_danger.max_value:
+        #    toast("Peligro fuera de rango")
+
+        if data["point_danger"] > data["point_warning"]:
+            toast("Peligro debe ser menor que precaución")
+            return
+
+        if  data["point_warning"] > data["point_safe"]:
+            toast("Precaución debe ser menor que seguro")
+            return
+            
+        if self.conn.is_open: 
+            self.save_params_event = Clock.schedule_once(partial(self.save_params_callback, data), 1/10) 
+        else:
+            toast("Dispositivo desconectado")
+
     def show_firmware_version(self):
         toast( "Firmware V" + self.firmware_version )
 

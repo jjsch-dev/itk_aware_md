@@ -142,6 +142,11 @@ Screen:
                         id: color_danger
                         pos_hint: {"center_x": .5, "center_y": .5} 
                         size_hint: 0.8, 0.8 
+                    MDRaisedButton:
+                        md_bg_color: 1, 0, 1, 1
+                        text: "Actualizar"
+                        pos_hint: {"center_x": .5, "center_y": .5} 
+                        on_release: app.write_params()
             Screen:
                 name: "leds_warning"
                 MDBoxLayout:
@@ -152,6 +157,11 @@ Screen:
                         id: color_warning
                         pos_hint: {"center_x": .5, "center_y": .5} 
                         size_hint: 0.8, 0.8 
+                    MDRaisedButton:
+                        md_bg_color: 1, 0, 1, 1
+                        text: "Actualizar"
+                        pos_hint: {"center_x": .5, "center_y": .5} 
+                        on_release: app.write_params()
             Screen:
                 name: "leds_safe"
                 MDBoxLayout:
@@ -162,6 +172,11 @@ Screen:
                         id: color_safe
                         pos_hint: {"center_x": .5, "center_y": .5} 
                         size_hint: 0.8, 0.8 
+                    MDRaisedButton:
+                        md_bg_color: 1, 0, 1, 1
+                        text: "Actualizar"
+                        pos_hint: {"center_x": .5, "center_y": .5} 
+                        on_release: app.write_params()
 
             Screen:
                 name: "distance"
@@ -186,6 +201,7 @@ Screen:
                         MDTextField:
                             id: point_danger
                             text: ""
+                            on_text_validate: app.write_params()
                     MDCard:
                         orientation: "vertical"
                         padding: "8dp"
@@ -203,6 +219,7 @@ Screen:
                         MDTextField:
                             id: point_warning
                             text: ""
+                            on_text_validate: app.write_params()
                     MDCard:
                         orientation: "vertical"
                         padding: "8dp"
@@ -220,6 +237,7 @@ Screen:
                         MDTextField:
                             id: point_safe
                             text: ""
+                            on_text_validate: app.write_params()
             Screen:
                 name: "buzzer"
                 MDBoxLayout:
@@ -242,6 +260,8 @@ Screen:
                             text: "Activa el buzzer"
                         MDSwitch:
                             id: buzzer_enable
+                            on_release: app.write_params()
+
                     MDCard:
                         orientation: "vertical"
                         padding: "8dp"
@@ -259,6 +279,7 @@ Screen:
                         MDTextField:
                             id: buzzer_ton
                             text: ""
+                            on_text_validate: app.write_params()
                     MDCard:
                         orientation: "vertical"
                         padding: "8dp"
@@ -276,6 +297,7 @@ Screen:
                         MDTextField:
                             id: buzzer_toff
                             text: ""
+                            on_text_validate: app.write_params()
             Screen:
                 name: "advance"
                 MDBoxLayout:
@@ -299,6 +321,7 @@ Screen:
                         MDTextField:
                             id: ewma_alpha
                             text: ""
+                            on_text_validate: app.write_params()
                     MDCard:
                         orientation: "vertical"
                         padding: "8dp"
@@ -316,6 +339,7 @@ Screen:
                         MDTextField:
                             id: hysterisis
                             text: ""
+                            on_text_validate: app.write_params()
                     MDCard:
                         orientation: "vertical"
                         padding: "8dp"
@@ -333,6 +357,7 @@ Screen:
                         MDTextField:
                             id: time_state
                             text: ""
+                            on_text_validate: app.write_params()
         MDNavigationDrawer:
             id: nav_drawer
 
