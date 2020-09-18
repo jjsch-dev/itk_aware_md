@@ -92,21 +92,17 @@ class ItkAware(MDApp):
         all_fields = True
 
         if "buzzer" in self.json_fields:
-            if bool(self.json_fields["buzzer"]) == True:
-                #self.ids.buzzer_enable.state = 'down'
-                self.root.ids.buzzer_enable.state = 'down'
-            else:
-                self.root.ids.buzzer_enable.state = 'normal'
+            self.root.ids.buzzer_enable.active = bool(self.json_fields["buzzer"])
         else:
             all_fields = False
 
         if "buzzer_ton" in self.json_fields:
-            self.root.ids.buzzer_ton = str(self.json_fields["buzzer_ton"])
+            self.root.ids.buzzer_ton.text = str(self.json_fields["buzzer_ton"])
         else:
             all_fields = False
         
         if "buzzer_toff" in self.json_fields:
-            self.root.ids.buzzer_toff = str(self.json_fields["buzzer_toff"])
+            self.root.ids.buzzer_toff.text = str(self.json_fields["buzzer_toff"])
         else:
             all_fields = False
 
@@ -140,13 +136,19 @@ class ItkAware(MDApp):
         else:
             all_fields = False
 
-        if not ("ewma_alpha" in self.json_fields): 
+        if "ewma_alpha" in self.json_fields: 
+            self.root.ids.ewma_alpha.text = str(self.json_fields["ewma_alpha"])
+        else:
             all_fields = False
 
-        if not ("hysterisis" in self.json_fields): 
+        if "hysterisis" in self.json_fields:
+            self.root.ids.hysterisis.text = str(self.json_fields["hysterisis"]) 
+        else:
             all_fields = False
 
-        if not ("time_state" in self.json_fields): 
+        if "time_state" in self.json_fields:
+            self.root.ids.time_state.text = str(self.json_fields["time_state"])  
+        else:
             all_fields = False
 
         if not ("log_level" in self.json_fields):

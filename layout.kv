@@ -85,6 +85,15 @@
                     root.toolbar.title = self.text
                 IconLeftWidget:
                     icon: "volume-high"
+            
+            OneLineIconListItem:
+                text: "Avanzado"
+                on_press: 
+                    root.nav_drawer.set_state("close")
+                    root.screen_manager.current = "advance"
+                    root.toolbar.title = self.text
+                IconLeftWidget:
+                    icon: "tune"
 
 Screen:
     MDToolbar:
@@ -160,7 +169,6 @@ Screen:
                     padding:20
                     spacing: 10
                     orientation: 'vertical'  
-                    #size_hint: 0.8, 0.8 
                     MDCard:
                         orientation: "vertical"
                         padding: "8dp"
@@ -177,12 +185,11 @@ Screen:
                             text: "Distancia en mm"
                         MDTextField:
                             id: point_danger
-                            text: "800"
+                            text: ""
                     MDCard:
                         orientation: "vertical"
                         padding: "8dp"
                         size_hint: 0.8, 0.8
-                        #size: "280dp", "120dp"
                         pos_hint: {"center_x": .5, "center_y": .5}
                         MDLabel:
                             text: "Precaución"
@@ -195,12 +202,11 @@ Screen:
                             text: "Distancia en mm"
                         MDTextField:
                             id: point_warning
-                            text: "1000"
+                            text: ""
                     MDCard:
                         orientation: "vertical"
                         padding: "8dp"
                         size_hint: 0.8, 0.8
-                        #size: "280dp", "120dp"
                         pos_hint: {"center_x": .5, "center_y": .5}
                         MDLabel:
                             text: "Seguro"
@@ -213,38 +219,17 @@ Screen:
                             text: "Distancia en mm"
                         MDTextField:
                             id: point_safe
-                            text: "1200"
-                    MDCard:
-                        orientation: "vertical"
-                        padding: "8dp"
-                        size_hint: 0.8, 0.8
-                        #size: "280dp", "120dp"
-                        pos_hint: {"center_x": .5, "center_y": .5}
-                        MDLabel:
-                            text: "Histerisis"
-                            theme_text_color: "Secondary"
-                            size_hint_y: None
-                            height: self.texture_size[1]
-                        MDSeparator:
-                            height: "1dp"
-                        MDLabel:
-                            text: "Distancia en mm"
-                        MDTextField:
-                            id: hysterisis
-                            text: "100"
-            
+                            text: ""
             Screen:
                 name: "buzzer"
                 MDBoxLayout:
                     padding:20
                     spacing: 10
                     orientation: 'vertical'   
-                    #halign: "center"    
                     MDCard:
                         orientation: "vertical"
                         padding: "8dp"
                         size_hint: 0.8, 0.8
-                        #size: "280dp", "150dp"
                         pos_hint: {"center_x": .5, "center_y": .5}
                         MDLabel:
                             text: "Buzzer"
@@ -261,7 +246,6 @@ Screen:
                         orientation: "vertical"
                         padding: "8dp"
                         size_hint: 0.8, 0.8
-                        #size: "280dp", "150dp"
                         pos_hint: {"center_x": .5, "center_y": .5}    
                         MDLabel:
                             text: "Emisión"
@@ -274,12 +258,11 @@ Screen:
                             text: "Duración en mS"
                         MDTextField:
                             id: buzzer_ton
-                            text: "100"
+                            text: ""
                     MDCard:
                         orientation: "vertical"
                         padding: "8dp"
                         size_hint: 0.8, 0.8
-                        #size: "280dp", "150dp"
                         pos_hint: {"center_x": .5, "center_y": .5}
                         MDLabel:
                             text: "Pausa"
@@ -292,8 +275,64 @@ Screen:
                             text: "Duración en mS"
                         MDTextField:
                             id: buzzer_toff
-                            text: "2000"
-
+                            text: ""
+            Screen:
+                name: "advance"
+                MDBoxLayout:
+                    padding:20
+                    spacing: 10
+                    orientation: 'vertical'   
+                    MDCard:
+                        orientation: "vertical"
+                        padding: "8dp"
+                        size_hint: 0.8, 0.8
+                        pos_hint: {"center_x": .5, "center_y": .5}
+                        MDLabel:
+                            text: "Filtro"
+                            theme_text_color: "Secondary"
+                            size_hint_y: None
+                            height: self.texture_size[1]
+                        MDSeparator:
+                            height: "1dp"
+                        MDLabel:
+                            text: "Respuesta del sensor"
+                        MDTextField:
+                            id: ewma_alpha
+                            text: ""
+                    MDCard:
+                        orientation: "vertical"
+                        padding: "8dp"
+                        size_hint: 0.8, 0.8
+                        pos_hint: {"center_x": .5, "center_y": .5}
+                        MDLabel:
+                            text: "Histerisis"
+                            theme_text_color: "Secondary"
+                            size_hint_y: None
+                            height: self.texture_size[1]
+                        MDSeparator:
+                            height: "1dp"
+                        MDLabel:
+                            text: "Distancia en mm"
+                        MDTextField:
+                            id: hysterisis
+                            text: ""
+                    MDCard:
+                        orientation: "vertical"
+                        padding: "8dp"
+                        size_hint: 0.8, 0.8
+                        pos_hint: {"center_x": .5, "center_y": .5}    
+                        MDLabel:
+                            text: "Estados"
+                            theme_text_color: "Secondary"
+                            size_hint_y: None
+                            height: self.texture_size[1]
+                        MDSeparator:
+                            height: "1dp"
+                        MDLabel:
+                            text: "Duración en mS"
+                        MDTextField:
+                            id: time_state
+                            text: ""
         MDNavigationDrawer:
             id: nav_drawer
 
@@ -301,4 +340,5 @@ Screen:
                 screen_manager: screen_manager.__self__
                 nav_drawer: nav_drawer.__self__
                 toolbar: toolbar.__self__
+                buzzer_enable: buzzer_enable.__self__
   
