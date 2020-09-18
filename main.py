@@ -9,6 +9,8 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ObjectProperty
 from kivy.clock import Clock
 from kivy.logger import Logger
+from kivy.graphics import Color
+from kivy import utils
 
 from kivymd.app import MDApp
 from kivymd.uix.filemanager import MDFileManager
@@ -23,10 +25,6 @@ DEVICE_CONNECTED = 2
 class ContentNavigationDrawer(BoxLayout):
     screen_manager = ObjectProperty()
     nav_drawer = ObjectProperty()
-
-#class RightCheckbox(IRightBodyTouch, MDCheckbox):
-    '''Custom right container.'''
-  #  pass
 
 class ItkAware(MDApp):
     def __init__(self, **kwargs):
@@ -77,7 +75,85 @@ class ItkAware(MDApp):
 
         self.manager_open = False
         self.file_manager.close()
-                
+
+    def int_to_color(self, val):
+        val = '{:06x}'.format(val, 'x') 
+        kivy_color = utils.get_color_from_hex(val)
+        return kivy_color
+
+    def color_to_int(self, kyvi_color):
+        hex_val = utils.get_hex_from_color(kyvi_color)
+        val = hex_val.replace('#', '')
+        val = val[:-2]
+        integer = int(val, 16)
+        return integer
+
+    def set_fields(self):
+        all_fields = True
+
+        if "buzzer" in self.json_fields:
+            if bool(self.json_fields["buzzer"]) == True:
+                #self.ids.buzzer_enable.state = 'down'
+                self.root.ids.buzzer_enable.state = 'down'
+            else:
+                self.root.ids.buzzer_enable.state = 'normal'
+        else:
+            all_fields = False
+
+        if "buzzer_ton" in self.json_fields:
+            self.root.ids.buzzer_ton = str(self.json_fields["buzzer_ton"])
+        else:
+            all_fields = False
+        
+        if "buzzer_toff" in self.json_fields:
+            self.root.ids.buzzer_toff = str(self.json_fields["buzzer_toff"])
+        else:
+            all_fields = False
+
+        if "point_danger" in self.json_fields:
+            self.root.ids.point_danger.text = str(self.json_fields["point_danger"])
+        else:
+            all_fields = False
+
+        if "point_warning" in self.json_fields:
+            self.root.ids.point_warning.text = str(self.json_fields["point_warning"])
+        else:
+            all_fields = False
+
+        if "point_safe" in self.json_fields:
+            self.root.ids.point_safe.text = str(self.json_fields["point_safe"])
+        else:
+            all_fields = False
+
+        if "color_danger" in self.json_fields: 
+            self.root.ids.color_danger.color = self.int_to_color(self.json_fields["color_danger"])
+        else:
+            all_fields = False
+
+        if "color_warning" in self.json_fields: 
+            self.root.ids.color_warning.color = self.int_to_color(self.json_fields["color_warning"])
+        else:
+            all_fields = False
+
+        if "color_safe" in self.json_fields: 
+            self.root.ids.color_safe.color = self.int_to_color(self.json_fields["color_safe"])
+        else:
+            all_fields = False
+
+        if not ("ewma_alpha" in self.json_fields): 
+            all_fields = False
+
+        if not ("hysterisis" in self.json_fields): 
+            all_fields = False
+
+        if not ("time_state" in self.json_fields): 
+            all_fields = False
+
+        if not ("log_level" in self.json_fields):
+            all_fields = False
+
+        return all_fields
+
     # Funcion temporizada que conecta automaticamente el equipo
     def conn_callback(self, obj):
         if self.conn_state == DEVICE_CLOSE:
@@ -161,7 +237,7 @@ class ItkAware(MDApp):
         # Para evitar incosistencias, invalida los parametros leidos.
         self.valid_parameters = False
         self.json_fields = self.conn.json_cmd(key="info", value="all-params", timeout=3)
-        self.valid_parameters = True #self.set_fields()
+        self.valid_parameters = self.set_fields()
 
         # A partir de la version 1.8 la respuesta incluye el comando.
         self.json_fields.pop('info', None)

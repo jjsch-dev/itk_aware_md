@@ -21,9 +21,7 @@
         height: self.texture_size[1]
 
     ScrollView:
-
         MDList:
-
             OneLineIconListItem:
                 text: "Abrir archivo"
                 on_press:
@@ -44,10 +42,28 @@
                     icon: "file-upload"
 
             OneLineIconListItem:
-                text: "Iluminación"
+                text: "Peligro"
                 on_press: 
                     root.nav_drawer.set_state("close")
-                    root.screen_manager.current = "leds"
+                    root.screen_manager.current = "leds_danger"
+                    root.toolbar.title = self.text
+                IconLeftWidget:
+                    icon: "led-on"
+            
+            OneLineIconListItem:
+                text: "Precaucion"
+                on_press: 
+                    root.nav_drawer.set_state("close")
+                    root.screen_manager.current = "leds_warning"
+                    root.toolbar.title = self.text
+                IconLeftWidget:
+                    icon: "led-on"
+            
+            OneLineIconListItem:
+                text: "Seguro"
+                on_press: 
+                    root.nav_drawer.set_state("close")
+                    root.screen_manager.current = "leds_safe"
                     root.toolbar.title = self.text
                 IconLeftWidget:
                     icon: "led-on"
@@ -71,11 +87,6 @@
                     icon: "volume-high"
 
 Screen:
-    #toolbar: toolbar.__self__
-    #spinner_progress: spinner_progress.__self__
-    #buzzer: buzzer.__self__
-    #container_buzzer: container_buzzer.__self__
-    #icon_buzzer: icon_buzzer.__self__
     MDToolbar:
         id: toolbar
         pos_hint: {"top": 1}
@@ -93,6 +104,7 @@ Screen:
 
     NavigationLayout:
         x: toolbar.height
+        size_hint_y: 1.0 - toolbar.height/root.height
 
         ScreenManager:
             id: screen_manager
@@ -112,23 +124,47 @@ Screen:
                     halign: "center"
 
             Screen:
-                name: "leds"
+                name: "leds_danger"
+                MDBoxLayout:
+                    padding:20
+                    spacing: 10
+                    orientation: 'vertical'
+                    ColorPicker:
+                        id: color_danger
+                        pos_hint: {"center_x": .5, "center_y": .5} 
+                        size_hint: 0.8, 0.8 
+            Screen:
+                name: "leds_warning"
+                MDBoxLayout:
+                    padding:20
+                    spacing: 10
+                    orientation: 'vertical'
+                    ColorPicker:
+                        id: color_warning
+                        pos_hint: {"center_x": .5, "center_y": .5} 
+                        size_hint: 0.8, 0.8 
+            Screen:
+                name: "leds_safe"
+                MDBoxLayout:
+                    padding:20
+                    spacing: 10
+                    orientation: 'vertical'
+                    ColorPicker:
+                        id: color_safe
+                        pos_hint: {"center_x": .5, "center_y": .5} 
+                        size_hint: 0.8, 0.8 
 
-                MDLabel:
-                    text: "Iluminación"
-                    halign: "center"
-            
             Screen:
                 name: "distance"
                 MDBoxLayout:
                     padding:20
                     spacing: 10
-                    orientation: 'vertical'   
+                    orientation: 'vertical'  
+                    #size_hint: 0.8, 0.8 
                     MDCard:
                         orientation: "vertical"
                         padding: "8dp"
-                        size_hint: None, None
-                        size: "280dp", "120dp"
+                        size_hint: 0.8, 0.8
                         pos_hint: {"center_x": .5, "center_y": .5}
                         MDLabel:
                             text: "Peligro"
@@ -145,8 +181,8 @@ Screen:
                     MDCard:
                         orientation: "vertical"
                         padding: "8dp"
-                        size_hint: None, None
-                        size: "280dp", "120dp"
+                        size_hint: 0.8, 0.8
+                        #size: "280dp", "120dp"
                         pos_hint: {"center_x": .5, "center_y": .5}
                         MDLabel:
                             text: "Precaución"
@@ -163,8 +199,8 @@ Screen:
                     MDCard:
                         orientation: "vertical"
                         padding: "8dp"
-                        size_hint: None, None
-                        size: "280dp", "120dp"
+                        size_hint: 0.8, 0.8
+                        #size: "280dp", "120dp"
                         pos_hint: {"center_x": .5, "center_y": .5}
                         MDLabel:
                             text: "Seguro"
@@ -181,8 +217,8 @@ Screen:
                     MDCard:
                         orientation: "vertical"
                         padding: "8dp"
-                        size_hint: None, None
-                        size: "280dp", "120dp"
+                        size_hint: 0.8, 0.8
+                        #size: "280dp", "120dp"
                         pos_hint: {"center_x": .5, "center_y": .5}
                         MDLabel:
                             text: "Histerisis"
@@ -207,8 +243,8 @@ Screen:
                     MDCard:
                         orientation: "vertical"
                         padding: "8dp"
-                        size_hint: None, None
-                        size: "280dp", "150dp"
+                        size_hint: 0.8, 0.8
+                        #size: "280dp", "150dp"
                         pos_hint: {"center_x": .5, "center_y": .5}
                         MDLabel:
                             text: "Buzzer"
@@ -219,13 +255,13 @@ Screen:
                             height: "1dp"
                         MDLabel:
                             text: "Activa el buzzer"
-                        MDCheckbox:
+                        MDSwitch:
                             id: buzzer_enable
                     MDCard:
                         orientation: "vertical"
                         padding: "8dp"
-                        size_hint: None, None
-                        size: "280dp", "150dp"
+                        size_hint: 0.8, 0.8
+                        #size: "280dp", "150dp"
                         pos_hint: {"center_x": .5, "center_y": .5}    
                         MDLabel:
                             text: "Emisión"
@@ -242,8 +278,8 @@ Screen:
                     MDCard:
                         orientation: "vertical"
                         padding: "8dp"
-                        size_hint: None, None
-                        size: "280dp", "150dp"
+                        size_hint: 0.8, 0.8
+                        #size: "280dp", "150dp"
                         pos_hint: {"center_x": .5, "center_y": .5}
                         MDLabel:
                             text: "Pausa"
@@ -265,8 +301,4 @@ Screen:
                 screen_manager: screen_manager.__self__
                 nav_drawer: nav_drawer.__self__
                 toolbar: toolbar.__self__
-                #toolbar: toolbar.__self__
-                #spinner_progress: spinner_progress.__self__
-                #buzzer: buzzer
-                #container_buzzer: container_buzzer
-                #icon_buzzer: icon_buzzer
+  
