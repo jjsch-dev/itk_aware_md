@@ -140,6 +140,9 @@ from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.floatlayout import MDFloatLayout
 from kivymd.uix.list import BaseListItem, ContainerSupport
 from kivymd.utils.fitimage import FitImage
+from kivymd.uix.textfield import MDTextField
+from kivymd.uix.button import MDFlatButton
+from kivymd.uix.dialog import MDDialog
 
 ACTIVITY_MANAGER = """
 #:import os os
@@ -223,18 +226,16 @@ ACTIVITY_MANAGER = """
     md_bg_color: root.theme_cls.bg_normal
 
     BoxLayout:
+        id: layout
         orientation: "vertical"
         spacing: dp(5)
 
         MDToolbar:
             id: toolbar
-            title: root.current_path
+            title: root.show_path
             right_action_items: [["close-box", lambda x: root.exit_manager(1)]]
             left_action_items: [["chevron-left", lambda x: root.back()]]
             elevation: 10
-  
-        MDTextField:
-            id: filename
 
         RecycleView:
             id: rv
@@ -262,6 +263,16 @@ ACTIVITY_MANAGER = """
         x: root.x + dp(16)
         y: root.y + root.height / 2 - self.height / 2
         size: dp(48), dp(48)
+
+<EditFNameDialog>
+    orientation: "vertical"
+    spacing: "12dp"
+    size_hint_y: None
+    height: "120dp"
+
+    MDTextField:
+        id: name
+
 """
 
 
@@ -277,6 +288,7 @@ class FloatButton(AnchorLayout):
     callback = ObjectProperty()
     md_bg_color = ListProperty([1, 1, 1, 1])
     icon = StringProperty()
+    anchor_y = StringProperty()
 
 
 class ModifiedOneLineIconListItem(ContainerSupport, BaseListItem):
@@ -289,6 +301,8 @@ class ModifiedOneLineIconListItem(ContainerSupport, BaseListItem):
         super().__init__(**kwargs)
         self.height = dp(48)
 
+class EditFNameDialog(MDBoxLayout):
+    pass
 
 class MDFileManager(ThemableBehavior, MDFloatLayout):
     icon = StringProperty("check")
@@ -348,6 +362,14 @@ class MDFileManager(ThemableBehavior, MDFloatLayout):
     Current directory.
 
     :attr:`current_path` is an :class:`~kivy.properties.StringProperty`
+    and defaults to `/`.
+    """
+
+    show_path = StringProperty(os.getcwd())
+    """
+    Show the current directory.
+
+    :attr:`show_path` is an :class:`~kivy.properties.StringProperty`
     and defaults to `/`.
     """
 
@@ -411,14 +433,31 @@ class MDFileManager(ThemableBehavior, MDFloatLayout):
     defaults to [].
     """
 
-    save_mode = BooleanProperty(False)
+    edit_name = BooleanProperty(False)
+    """
+    Determines whether the user is able to edit the file name.
+
+    :attr:`edit_name` is a :class:`~kivy.properties.BooleanProperty` and defaults to
+    False.
+    """
+
+    current_filename = StringProperty("")
+    """
+    Current filename.
+
+    :attr:`current_filename` is an :class:`~kivy.properties.StringProperty`
+    and defaults to `/`.
+    """
+
+    edit_dialog = None
+    current_filename = None
 
     _window_manager = None
     _window_manager_open = False
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
+        
         toolbar_label = self.ids.toolbar.children[1].children[0]
         toolbar_label.font_style = "Subtitle1"
 
@@ -473,13 +512,17 @@ class MDFileManager(ThemableBehavior, MDFloatLayout):
 
         return sorted_files
 
-    def show(self, path, fname=""):
+    def show(self, path, name=""):
         """Forms the body of a directory tree.
 
         :param path:
             The path to the directory that will be opened in the file manager.
+        
+        :param name:
+            The file name that will be joined with path in the file manager.
         """
-        self.ids.filename.text = fname
+        self.current_filename = name
+        self.show_path = os.path.join(path, name)
         self.current_path = path
         self.selection = []
         dirs, files = self.get_content()
@@ -489,9 +532,13 @@ class MDFileManager(ThemableBehavior, MDFloatLayout):
             pass
         elif not dirs and not files:  # directory is unavailable
             return
-        
-        self.ids.filename.opacity = 1 if self.save_mode else 0 
-  
+
+        if self.edit_name:
+            if self.ids.toolbar.right_action_items[0][0] != "pencil":
+                self.ids.toolbar.right_action_items.insert(0, ["pencil", lambda x: self.edit_filename()])
+        elif self.ids.toolbar.right_action_items[0][0] == "pencil":
+            self.ids.toolbar.right_action_items.pop(0)
+
         if self.preview:
             for name_dir in self.__sort_files(dirs):
                 manager_list.append(
@@ -639,7 +686,7 @@ class MDFileManager(ThemableBehavior, MDFloatLayout):
 
         else:
             self.current_path = path
-            self.show(path)
+            self.show(path, self.current_filename)
 
     def back(self):
         """Returning to the branch down in the directory tree."""
@@ -651,16 +698,48 @@ class MDFileManager(ThemableBehavior, MDFloatLayout):
             self.exit_manager(1)
 
         else:
-            self.show(path)
+            self.show(path, self.current_filename)
 
     def select_directory_on_press_button(self, *args):
         """Called when a click on a floating button."""
 
         if len(self.selection) > 0:
             self.select_path(self.selection)
-        elif self.save_mode:
-            self.select_path(os.path.join(self.current_path, self.ids.filename.text))
         else:
-            self.select_path(os.path.join(self.current_path, path))
+            self.select_path(os.path.join(self.current_path))
+    
+    def edit_filename(self):
+        """Called when a click on a edit button."""
+        if not self.edit_dialog:
+            self.edit_dialog = MDDialog(
+                title="File name:",
+                type="custom",
+                content_cls=EditFNameDialog(),
+                buttons=[
+                    MDFlatButton(
+                        text="CANCEL",
+                        text_color=self.theme_cls.primary_color,
+                        on_release=self.edit_dialog_close,
+                    ),
+                    MDFlatButton(
+                        text="OK", text_color=self.theme_cls.primary_color,
+                        on_release=self.edit_dialog_ok,
+                    ),
+                ],
+            )
+        self.edit_dialog.content_cls.children[0].text = self.current_filename 
+        self.edit_dialog.set_normal_height()  
+        self.edit_dialog.open()
+    
+    def edit_dialog_close(self, inst):
+        """Called when a click on close edit button."""
+        self.edit_dialog.dismiss()
+    
+    def edit_dialog_ok(self, inst):
+        """Called when a click on ok edit button."""
+        self.current_filename = self.edit_dialog.content_cls.children[0].text 
+        self.show_path = os.path.join(self.current_path, self.current_filename)
+        self.edit_dialog.dismiss()
+
     
 Builder.load_string(ACTIVITY_MANAGER)

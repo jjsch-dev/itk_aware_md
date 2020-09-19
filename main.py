@@ -22,6 +22,7 @@ from filemanager import MDFileManager
 
 from serial_device import SerialDevice
 import json
+import ntpath
 
 DEVICE_CLOSE = 0
 DEVICE_CONNECTING = 1
@@ -66,12 +67,12 @@ class ItkAware(MDApp):
         config.setdefaults('parameters-file', {'name':'aware_cfg', 'ext':'json', 'index':0})
 
     def file_manager_open(self):
-        self.file_manager.save_mode = False
+        self.file_manager.edit_name = False
         self.file_manager.show('/home/jjsch/Desktop', "")  # output manager to the screen
         self.manager_open = True
 
     def file_manager_save(self):
-        self.file_manager.save_mode = True
+        self.file_manager.edit_name = True
         self.file_manager.show('/home/jjsch/Desktop', "test.js")  # output manager to the screen
         self.manager_open = True
 
@@ -85,13 +86,12 @@ class ItkAware(MDApp):
         self.path = path
         self.exit_manager()
 
-        if not self.file_manager.save_mode:
+        if not self.file_manager.edit_name:
             self.show_alert_open_file()
               
     def show_alert_open_file(self):
         if not self.dialog:
             self.dialog = MDDialog(
-                title="Cargar archivo",
                 text="Esta seguro que desea actualizar el equipo?",
                 buttons=[
                     
@@ -102,11 +102,12 @@ class ItkAware(MDApp):
                     ),
                     MDRaisedButton(               
                         text="Aceptar", 
-                        text_color=self.theme_cls.primary_color,
+                        #text_color=self.theme_cls.primary_color,
                         on_release=self.send_file
                     ),
                 ],
             )
+        self.dialog.title = "Cargar [{}]".format(ntpath.basename(self.path))
         self.dialog.set_normal_height()
         self.dialog.open()
     
