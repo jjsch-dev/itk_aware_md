@@ -104,12 +104,6 @@ Screen:
         title: "Estado"
         left_action_items: [["menu", lambda x: nav_drawer.set_state("open")]]
         right_action_items: [["ethernet-cable-off", lambda x: None], ["backup-restore", lambda x: app.show_alert_factory_reset()]]
-    MDSpinner:
-        id: spinner_progress
-        size_hint: None, None
-        size: dp(48), dp(48)
-        pos_hint: {'center_x': .5, 'center_y': .5}
-        active: False 
 
     NavigationLayout:
         x: toolbar.height
@@ -356,4 +350,25 @@ Screen:
                 nav_drawer: nav_drawer.__self__
                 toolbar: toolbar.__self__
                 buzzer_enable: buzzer_enable.__self__
+
+<ProgressDialog>
+    orientation: "vertical"
+    spacing: "12dp"
+    size_hint_y: None
+    height: "120dp"
+
+    MDLabel:
+        text: "MDLabel"
+
+    MDSpinner:
+        id: spinner_progress
+        size_hint: None, None
+        size: dp(48), dp(48)
+        pos_hint: {'center_x': .5, 'center_y': .5}
+        active: True     
+
+    MDProgressBar:
+        id: progress
+        min: 0
+        max: 1
   

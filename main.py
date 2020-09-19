@@ -17,6 +17,7 @@ from kivymd.app import MDApp
 from kivymd.toast import toast
 from kivymd.uix.button import MDFlatButton, MDRaisedButton
 from kivymd.uix.dialog import MDDialog
+from kivymd.uix.boxlayout import MDBoxLayout
 
 from filemanager import MDFileManager
 
@@ -27,12 +28,17 @@ import ntpath
 DEVICE_CLOSE = 0
 DEVICE_CONNECTING = 1
 DEVICE_CONNECTED = 2
+DEVICE_READ_PARAMS = 3
+DEVICE_IS_REMOVE = 4
 
 from functools import partial
 
 class ContentNavigationDrawer(BoxLayout):
     screen_manager = ObjectProperty()
     nav_drawer = ObjectProperty()
+
+class ProgressDialog(MDBoxLayout):
+    pass
 
 class ItkAware(MDApp):
     def __init__(self, **kwargs):
@@ -53,6 +59,7 @@ class ItkAware(MDApp):
            preview=False)
         self.file_manager.ext.clear()
         self.file_manager.ext.append(".json")
+        self.progress_dialog = None
 
     def on_start(self):
         self.conn_event = Clock.schedule_once(self.conn_callback, 1/100)
@@ -203,6 +210,29 @@ class ItkAware(MDApp):
 
         return all_fields
 
+    def progress_dialog_start(self, title=None, text=None):
+        """Called when a click on a edit button."""
+        if not self.progress_dialog:
+            self.progress_dialog = MDDialog(
+                type="custom",
+                content_cls=ProgressDialog(),
+            )
+        self.progress_dialog_update(0, title, text)
+        self.progress_dialog.set_normal_height()  
+        self.progress_dialog.open()
+    
+    def progress_dialog_close(self):
+        self.progress_dialog.dismiss()
+    
+    def progress_dialog_update(self, value, title=None, text=None):
+        if title:
+            self.progress_dialog.title = title
+
+        if text:
+             self.progress_dialog.content_cls.children[2].text = text
+
+        self.progress_dialog.content_cls.children[0].value = value 
+
     # Funcion temporizada que conecta automaticamente el equipo
     def conn_callback(self, obj):
         if self.conn_state == DEVICE_CLOSE:
@@ -210,10 +240,20 @@ class ItkAware(MDApp):
                 self.conn_state = DEVICE_CONNECTING
         elif self.conn_state == DEVICE_CONNECTING:
             if self.establish_connection():
-                self.conn_state = DEVICE_CONNECTED
+                self.conn_state = DEVICE_READ_PARAMS
             elif self.retry_conn >= 6:
                 self.device_close()
                 self.conn_state = DEVICE_CLOSE
+        elif self.conn_state == DEVICE_READ_PARAMS:
+            self.read_params()
+            self.progress_dialog_update(1)
+            self.conn_state = DEVICE_CONNECTED
+        elif self.conn_state == DEVICE_CONNECTED:
+            if self.retry_conn >= 1:
+               self.progress_dialog_close() 
+               self.conn_state = DEVICE_IS_REMOVE
+            else:
+                self.retry_conn += 1
         elif not self.conn.is_attached:
             self.device_close()
             self.conn_state = DEVICE_CLOSE
@@ -225,7 +265,7 @@ class ItkAware(MDApp):
         try:
             if self.conn.open(self.config.get('serial', 'port')):
                 Logger.info( "device open" )
-                self.progress_spinner(active = True)
+                self.progress_dialog_start(title="Conexión", text="Conectado")
                 return True
         except: pass
         
@@ -234,7 +274,9 @@ class ItkAware(MDApp):
 
     def establish_connection(self):
         self.retry_conn = self.retry_conn + 1
- 
+
+        self.progress_dialog_update(self.retry_conn/6)
+
         Logger.info( "connecting try %d", self.retry_conn )
         try:
             # desactiva el log para que el consumo de CPU disminuya.
@@ -243,14 +285,16 @@ class ItkAware(MDApp):
                 self.json_fields = self.conn.json_cmd(key="info", value="version")
                 if self.json_fields and ("version" in self.json_fields.keys()):
                     self.firmware_version = self.json_fields["version"]
-                    self.show_firmware_version()
-                    self.read_params()
+                    self.progress_dialog_update(0.8, 
+                                                text="Firmware V" + self.firmware_version,
+                                                title="Leyendo")
+                    # Resetea el contador para que muestre el mensaje de version
+                    # por unos segundos.
+                    self.retry_conn = 0
                     self.usb_icon(on_line=True)
                     
                     Logger.info( "device connected" )
-
-                    self.progress_spinner(active = False)
-                    
+                   
                     return True
         except: pass
         
@@ -263,15 +307,11 @@ class ItkAware(MDApp):
             self.root.ids.toolbar.right_action_items.pop(0)
             self.root.ids.toolbar.right_action_items.insert(0, [icon, lambda x: None])
 
-    def progress_spinner(self, active):
-        if self.root.ids.spinner_progress.active != active:
-            self.root.ids.spinner_progress.active = active
-
     def device_close(self):
         self.retry_conn = 0
 
-        self.progress_spinner(active = False)
         self.usb_icon(on_line=False)
+        self.progress_dialog_close()
 
         if self.conn.is_open:
             Logger.info( "device_close" )
@@ -295,10 +335,12 @@ class ItkAware(MDApp):
             toast( "Problemas leyendo" )
     
     def write_ok_callback(self, obj):
-        self.progress_spinner(active=False)
-        toast("actualizado")
+        self.progress_dialog_close()
 
     def save_params_callback(self, data, *largs):
+        # Indica que se completaron dos tercios de la operacion.
+        self.progress_dialog_update(2/3)
+
         if self.conn.is_open:
             data_json = json.dumps(data)
             if not self.conn.send_cmd(data_json) :
@@ -306,7 +348,9 @@ class ItkAware(MDApp):
             else:
                 self.json_fields = data
                 self.valid_parameters = True
-                 
+                
+                self.progress_dialog_update(1, text="actualizado")
+
                 self.write_ok_event = Clock.schedule_once(self.write_ok_callback, 1) 
         else:
             toast("Dispositivo desconectado")
@@ -318,7 +362,8 @@ class ItkAware(MDApp):
         if self.write_ok_event:
             self.write_ok_event.cancel()
 
-        self.progress_spinner(active=True)
+        # Se completo un tercio de la operacion.
+        self.progress_dialog_start(title="Actualizando", text="configuración") 
 
         data = {}
         try:
@@ -372,7 +417,6 @@ class ItkAware(MDApp):
                     ),
                     MDRaisedButton(               
                         text="Aceptar", 
-                        text_color=self.theme_cls.primary_color,
                         on_release=self.on_load_default
                     ),
                 ],
