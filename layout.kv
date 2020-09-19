@@ -38,6 +38,7 @@
                     root.nav_drawer.set_state("close")
                     root.screen_manager.current = "save_file"
                     root.toolbar.title = self.text
+                    app.file_manager_save()
                 IconLeftWidget:
                     icon: "file-upload"
 
@@ -119,18 +120,8 @@ Screen:
 
             Screen:
                 name: "open_file"
-
-                MDLabel:
-                    text: "Abrir archivo"
-                    halign: "center"
-
             Screen:
                 name: "save_file"
-
-                MDLabel:
-                    text: "Salvar archivo"
-                    halign: "center"
-
             Screen:
                 name: "leds_danger"
                 MDBoxLayout:

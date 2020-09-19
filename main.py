@@ -13,10 +13,12 @@ from kivy.graphics import Color
 from kivy import utils
 
 from kivymd.app import MDApp
-from kivymd.uix.filemanager import MDFileManager
+#from kivymd.uix.filemanager import MDFileManager
 from kivymd.toast import toast
 from kivymd.uix.button import MDFlatButton, MDRaisedButton
 from kivymd.uix.dialog import MDDialog
+
+from filemanager import MDFileManager
 
 from serial_device import SerialDevice
 import json
@@ -47,7 +49,9 @@ class ItkAware(MDApp):
         self.file_manager = MDFileManager(
            exit_manager=self.exit_manager,
            select_path=self.select_path,
-           previous=False)
+           preview=False)
+        self.file_manager.ext.clear()
+        self.file_manager.ext.append(".json")
 
     def on_start(self):
         self.conn_event = Clock.schedule_once(self.conn_callback, 1/100)
@@ -61,13 +65,16 @@ class ItkAware(MDApp):
         config.setdefaults('device-log', {'fpath':'log/', 'fname':'aware.log'})
         config.setdefaults('parameters-file', {'name':'aware_cfg', 'ext':'json', 'index':0})
 
-
     def file_manager_open(self):
-        self.file_manager.ext.clear()
-        self.file_manager.ext.append(".json")
-        self.file_manager.show('/home/jjsch/Desktop')  # output manager to the screen
+        self.file_manager.save_mode = False
+        self.file_manager.show('/home/jjsch/Desktop', "")  # output manager to the screen
         self.manager_open = True
-            
+
+    def file_manager_save(self):
+        self.file_manager.save_mode = True
+        self.file_manager.show('/home/jjsch/Desktop', "test.js")  # output manager to the screen
+        self.manager_open = True
+
     def select_path(self, path):
         '''It will be called when you click on the file name
         or the catalog selection button.
@@ -77,7 +84,9 @@ class ItkAware(MDApp):
         '''
         self.path = path
         self.exit_manager()
-        self.show_alert_open_file()
+
+        if not self.file_manager.save_mode:
+            self.show_alert_open_file()
               
     def show_alert_open_file(self):
         if not self.dialog:
