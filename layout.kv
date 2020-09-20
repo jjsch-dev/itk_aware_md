@@ -24,10 +24,12 @@
         MDList:
             OneLineIconListItem:
                 text: "Acerca"
+                title: "Información"
+                id: app_info_item
                 on_press:
                     root.nav_drawer.set_state("close")
                     root.screen_manager.current = "app_info"
-                    root.toolbar.title = self.text
+                    root.toolbar.title = self.title
                 IconLeftWidget:
                     icon: "information"
             
@@ -35,8 +37,8 @@
                 text: "Abrir archivo"
                 on_press:
                     root.nav_drawer.set_state("close")
-                    root.screen_manager.current = "open_file"
-                    root.toolbar.title = self.text
+                    root.screen_manager.current = "app_info"
+                    root.toolbar.title = app_info_item.title
                     app.file_manager_open()
                 IconLeftWidget:
                     icon: "file-download"
@@ -45,8 +47,8 @@
                 text: "Salvar archivo"
                 on_press: 
                     root.nav_drawer.set_state("close")
-                    root.screen_manager.current = "save_file"
-                    root.toolbar.title = self.text
+                    root.screen_manager.current = "app_info"
+                    root.toolbar.title = app_info_item.title
                     app.file_manager_save()
                 IconLeftWidget:
                     icon: "file-upload"
@@ -189,10 +191,6 @@ Screen:
                             text: "Intelektron SA"
                             pos_hint: {"center_x": .5, "center_y": .5}
 
-            Screen:
-                name: "open_file"
-            Screen:
-                name: "save_file"
             Screen:
                 name: "leds_danger"
                 MDBoxLayout:
