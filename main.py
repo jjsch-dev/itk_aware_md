@@ -248,12 +248,12 @@ class ItkAware(MDApp):
             all_fields = False
 
         if "buzzer_ton" in self.json_fields:
-            self.root.ids.buzzer_ton.text = str(self.json_fields["buzzer_ton"])
+            self.root.ids.buzzer_ton.value = int(self.json_fields["buzzer_ton"]/100)
         else:
             all_fields = False
         
         if "buzzer_toff" in self.json_fields:
-            self.root.ids.buzzer_toff.text = str(self.json_fields["buzzer_toff"])
+            self.root.ids.buzzer_toff.value = str(self.json_fields["buzzer_toff"]/100)
         else:
             all_fields = False
 
@@ -469,8 +469,8 @@ class ItkAware(MDApp):
         data = {}
         try:
             data["buzzer"] = self.root.ids.buzzer_enable.active
-            data["buzzer_ton"] = int(self.root.ids.buzzer_ton.text)
-            data["buzzer_toff"] = int(self.root.ids.buzzer_toff.text)
+            data["buzzer_ton"] = int(self.root.ids.buzzer_ton.value) * 100
+            data["buzzer_toff"] = int(self.root.ids.buzzer_toff.value) * 100
             data["point_danger"] = int(self.root.ids.point_danger.value) * 100
             data["point_warning"] = int(self.root.ids.point_warning.value) * 100
             data["point_safe"] = int(self.root.ids.point_safe.value) * 100

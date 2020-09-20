@@ -267,11 +267,15 @@ Screen:
                         MDSeparator:
                             height: "1dp"
                         MDLabel:
-                            text: "Duración en mS"
-                        MDTextField:
+                            text: "Duración {:2.2f} Seg".format(buzzer_ton.value/10)
+                        SliderOnRelease:
                             id: buzzer_ton
-                            text: ""
-                            on_text_validate: app.write_params()
+                            min: 0
+                            max: 20
+                            value: 0
+                            step: 1
+                            hint: False
+                            on_release: app.write_params()
                     MDCard:
                         orientation: "vertical"
                         padding: "8dp"
@@ -285,11 +289,15 @@ Screen:
                         MDSeparator:
                             height: "1dp"
                         MDLabel:
-                            text: "Duración en mS"
-                        MDTextField:
+                            text: "Duración {:2.2f} Seg".format(buzzer_toff.value/10)
+                        SliderOnRelease:
                             id: buzzer_toff
-                            text: ""
-                            on_text_validate: app.write_params()
+                            min: 0
+                            max: 20
+                            value: 0
+                            step: 1
+                            hint: False
+                            on_release: app.write_params()
             Screen:
                 name: "advance"
                 MDBoxLayout:
