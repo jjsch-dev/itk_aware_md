@@ -1,8 +1,9 @@
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.popup import Popup
-from kivy.uix.button import Button
-from kivy.uix.togglebutton import ToggleButton
 from kivy.event import EventDispatcher
+
+from kivymd.app import MDApp
+from kivymd.uix.behaviors.toggle_behavior import MDToggleButton
+from kivymd.uix.button import MDRectangleFlatIconButton
+from kivymd.uix.boxlayout import MDBoxLayout
 
 from kivy.garden.matplotlib.backend_kivyagg import FigureCanvasKivyAgg
 import matplotlib.pyplot as plt
@@ -12,6 +13,11 @@ import json
 import pathlib
 import os
 from time import localtime, strftime
+
+class MyToggleButton(MDRectangleFlatIconButton, MDToggleButton):
+    def __init__(self, **kwargs):
+        self.background_down = MDApp.get_running_app().theme_cls.primary_dark
+        super().__init__(**kwargs)
 
 class PlotDistance(EventDispatcher):
     def __init__(self, plot_box, fname_log, fpath_image, fname_image, 
@@ -53,25 +59,29 @@ class PlotDistance(EventDispatcher):
         self.ax.set_xlim(0, self.plot_max_len)
         self.ax.set_ylim(0, 8500)
         
-        self.box = plot_box #BoxLayout(orientation = "vertical", padding = 10, spacing = 10)
-        self.button_layout = BoxLayout(size_hint = (1, 0.1), orientation = "horizontal") 
-        self.play_button = ToggleButton(text = "Comenzar") 
-        self.log_button = ToggleButton(text = "Log")
-        self.picture_button = Button(text = "Foto")
-        self.exit_button = Button(text = "Salir")
+        self.box = plot_box 
+        self.button_layout = MDBoxLayout(spacing = 10,
+                                         size_hint = (1, 0.1), 
+                                         pos_hint = {"center_x": 0.8, "center_y": .5},
+                                         orientation = "horizontal") 
+        self.play_button = MyToggleButton(text = "Comenzar", icon = "play") 
+        self.log_button = MyToggleButton(text = "Log", icon = "content-save")
+        self.picture_button = MyToggleButton(text = "Foto", icon = "camera")
         self.button_layout.add_widget(self.play_button)
         self.button_layout.add_widget(self.log_button)
         self.button_layout.add_widget(self.picture_button)
-        self.button_layout.add_widget(self.exit_button)
         
         self.fig_canvas = FigureCanvasKivyAgg(plt.gcf())
         self.box.add_widget(self.fig_canvas)
         self.box.add_widget(self.button_layout)
-
-        self.register_event_type('on_plot_close')
         
         def on_play_text(self):
-            self.text = "Detener" if self.state == "down" else "Comenzar"
+            if self.state == "down":
+                self.text = "Detener"
+                self.icon = "stop"
+            else:
+                self.text = "Comenzar"
+                self.icon = "play"
 
         self.play_button.bind(on_press = on_play_text)
         self.picture_button.bind(on_press = self.capture_picture)
@@ -161,19 +171,7 @@ class PlotDistance(EventDispatcher):
             
             self.fig.canvas.draw()
 
-    def start(self):
-        # self.popup = Popup(title = "Grafica de detección y distancia", 
-        #                    content = self.box, 
-        #                    size_hint = (.9, .9),
-        #                    auto_dismiss = False) 
-        
-        self.exit_button.bind(on_press = self.on_exit)
-
-       # self.popup.open() 
-    
-    def on_plot_close(self):
-        pass
-
-    def on_exit(self, obj):
-        #self.popup.dismiss()
-        self.dispatch('on_plot_close')
+    def close(self):
+        if self.box:
+            self.box.clear_widgets()
+   

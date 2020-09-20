@@ -112,7 +112,7 @@ Screen:
         pos_hint: {"top": 1}
         elevation: 10
         title: "Estado"
-        left_action_items: [["menu", lambda x: nav_drawer.set_state("open")]]
+        left_action_items: [["menu", lambda x: app.on_navdrawer()]]
         right_action_items: [["ethernet-cable-off", lambda x: None], ["backup-restore", lambda x: app.show_alert_factory_reset()]]
 
     NavigationLayout:

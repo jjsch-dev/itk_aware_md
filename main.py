@@ -89,6 +89,8 @@ class ItkAware(MDApp):
         self.file_manager.ext.clear()
         self.file_manager.ext.append(".json")
         self.progress_dialog = None
+        self.event_plot = None
+        self.plot = None
 
     def on_start(self):
         self.conn_event = Clock.schedule_once(self.conn_callback, 1/100)
@@ -117,6 +119,12 @@ class ItkAware(MDApp):
         config.setdefaults('parameters-file', {'name':'aware_cfg', 'ext':'json', 'index':0})
         config.setdefaults('last-path', {'path':''})
 
+    def on_navdrawer(self):
+        self.root.ids.nav_drawer.set_state("open")
+        
+        if self.root.ids.screen_manager.current == "graph_state":
+            self.on_finish_plot()
+        
     def get_path(self):
         if not os.path.isdir(self.path):
             return os.path.dirname(self.path)
@@ -507,6 +515,10 @@ class ItkAware(MDApp):
         toast( "Firmware V" + self.firmware_version )
     
     def show_alert_factory_reset(self):
+        # Los parametros no se pueden modificar cuando esta graficando los estados
+        if self.root.ids.screen_manager.current == "graph_state":
+            return
+
         if not self.dialog:
             self.dialog = MDDialog(
                 title="Resetear a fabrica?",
@@ -573,8 +585,6 @@ class ItkAware(MDApp):
         if platform == 'android':
             toast("No soportado")
         else:
-            #TODO: averiguar como acceder a home desde on_finish_plot
-            home = self
             if not self.conn.is_open:
                 toast("Dispositivo desconectado")
                 return
@@ -593,7 +603,7 @@ class ItkAware(MDApp):
             local_path = str(pathlib.Path().absolute())
             fname_log = os.path.join(local_path, "itk-aware.log")
         
-            plot = PlotDistance(self.root.ids.plot_box,
+            self.plot = PlotDistance(self.root.ids.plot_box,
                                 fname_log = fname_log, 
                                 fpath_image = self.config.get("capture", "fpath"),
                                 fname_image = self.config.get("capture", "fname"),
@@ -606,27 +616,28 @@ class ItkAware(MDApp):
             
             def update_plot(self, obj):
                 try:
-                    for i in range (0,20):
+                    for i in range(20):
                         log_fields = self.conn.json_answ(key="info", value="log", timeout=1/100)
                         # Verifica que el JSON retornado contenga los campos
                         # necesarios para graficar.
                         s1 = set(["time", "raw", "filtered", "state"]) 
                         if s1.issubset( log_fields.keys() ) == True:
-                            plot.add( log_fields )
+                            self.plot.add( log_fields )
                         else:    
                             break
                         
-                    plot.update()
+                    self.plot.update()
                 except: pass
 
-            plot.start()
+            self.event_plot = Clock.schedule_interval(partial(update_plot, self), 1/100)
             
-            event = Clock.schedule_interval(partial(update_plot, self), 1/100)
-            
-            def on_finish_plot(self):
-                event.cancel()
-                home.conn.json_cmd("log_level", "0")
-
-            plot.bind(on_plot_close = on_finish_plot)
+    def on_finish_plot(self):
+        if self.event_plot:
+            self.event_plot.cancel()
+        
+        self.conn.json_cmd("log_level", "0")
+        
+        if self.plot:
+            self.plot.close()
 
 ItkAware().run()
