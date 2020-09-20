@@ -34,6 +34,8 @@ import os
 if platform == 'android':
     from android.storage import primary_external_storage_path
     from android.permissions import request_permissions, Permission
+else:    
+    from plot_distance import PlotDistance
 
 DEVICE_CLOSE = 0
 DEVICE_CONNECTING = 1
@@ -559,5 +561,71 @@ class ItkAware(MDApp):
         self.set_fields()
 
         self.write_params()
+
+    def is_level_json(self):
+        try:
+            if self.valid_parameters and self.json_fields["log_level"] == 2:
+                return True
+        except:
+            return False
+
+    def on_plot(self):
+        if platform == 'android':
+            toast("No soportado")
+        else:
+            #TODO: averiguar como acceder a home desde on_finish_plot
+            home = self
+            if not self.conn.is_open:
+                toast("Dispositivo desconectado")
+                return
+
+            if not self.valid_parameters:
+                toast("Lea los parametros del equipo")
+                return
+                
+            if not self.is_level_json():
+                json_level = self.conn.json_cmd("log_level", "2")
+
+                if not json_level:
+                    toast("No se pudo activar el log")
+                    return 
+
+            local_path = str(pathlib.Path().absolute())
+            fname_log = os.path.join(local_path, "itk-aware.log")
+        
+            plot = PlotDistance(fname_log = fname_log, 
+                                fpath_image = self.config.get("capture", "fpath"),
+                                fname_image = self.config.get("capture", "fname"),
+                                point_danger = self.json_fields["point_danger"],
+                                point_warning = self.json_fields["point_warning"],
+                                point_safe = self.json_fields["point_safe"],
+                                color_danger = self.root.ids.color_danger.color,
+                                color_warning = self.root.ids.color_warning.color,
+                                color_safe = self.root.ids.color_safe.color )
+            
+            def update_plot(self, obj):
+                try:
+                    for i in range (0,20):
+                        log_fields = self.conn.json_answ(key="info", value="log", timeout=1/100)
+                        # Verifica que el JSON retornado contenga los campos
+                        # necesarios para graficar.
+                        s1 = set(["time", "raw", "filtered", "state"]) 
+                        if s1.issubset( log_fields.keys() ) == True:
+                            plot.add( log_fields )
+                        else:    
+                            break
+                        
+                    plot.update()
+                except: pass
+
+            plot.start()
+            
+            event = Clock.schedule_interval(partial(update_plot, self), 1/100)
+            
+            def on_finish_plot(self):
+                event.cancel()
+                home.conn.json_cmd("log_level", "0")
+
+            plot.bind(on_plot_close = on_finish_plot)
 
 ItkAware().run()

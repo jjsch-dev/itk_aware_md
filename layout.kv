@@ -52,7 +52,7 @@
                     icon: "led-on"
             
             OneLineIconListItem:
-                text: "Precaucion"
+                text: "Precaución"
                 on_press: 
                     root.nav_drawer.set_state("close")
                     root.screen_manager.current = "leds_warning"
@@ -70,7 +70,7 @@
                     icon: "led-on"
 
             OneLineIconListItem:
-                text: "Zona"
+                text: "Zonas"
                 on_press: 
                     root.nav_drawer.set_state("close")
                     root.screen_manager.current = "distance"
@@ -95,6 +95,16 @@
                     root.toolbar.title = self.text
                 IconLeftWidget:
                     icon: "tune"
+            
+            OneLineIconListItem:
+                text: "Graficar estados"
+                on_press: 
+                    root.nav_drawer.set_state("close")
+                    root.screen_manager.current = "graph_state"
+                    root.toolbar.title = self.text
+                    app.on_plot()
+                IconLeftWidget:
+                    icon: "chart-bell-curve-cumulative"
 
 Screen:
     MDToolbar:
@@ -373,6 +383,8 @@ Screen:
                             step: 1
                             hint: False
                             on_release: app.write_params()
+            Screen:
+                name: "graph_state"
 
         MDNavigationDrawer:
             id: nav_drawer
