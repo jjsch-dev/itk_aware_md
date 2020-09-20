@@ -320,11 +320,15 @@ Screen:
                         MDSeparator:
                             height: "1dp"
                         MDLabel:
-                            text: "Respuesta del sensor"
-                        MDTextField:
+                            text: "Constante alfa {:2.2f}".format(ewma_alpha.value/20)
+                        SliderOnRelease:
                             id: ewma_alpha
-                            text: ""
-                            on_text_validate: app.write_params()
+                            min: 0
+                            max: 10
+                            value: 0
+                            step: 1
+                            hint: False
+                            on_release: app.write_params()
                     MDCard:
                         orientation: "vertical"
                         padding: "8dp"
@@ -337,12 +341,6 @@ Screen:
                             height: self.texture_size[1]
                         MDSeparator:
                             height: "1dp"
-                        # MDLabel:
-                        #     text: "Distancia en mm"
-                        # MDTextField:
-                        #     id: hysterisis
-                        #     text: ""
-                        #     on_text_validate: app.write_params()
                         MDLabel:
                             text: "Distancia {:.0f} mm".format(hysterisis.value*100)
                         SliderOnRelease:

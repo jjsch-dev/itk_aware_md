@@ -288,7 +288,7 @@ class ItkAware(MDApp):
             all_fields = False
 
         if "ewma_alpha" in self.json_fields: 
-            self.root.ids.ewma_alpha.text = str(self.json_fields["ewma_alpha"])
+            self.root.ids.ewma_alpha.value = str(self.json_fields["ewma_alpha"] * 20)
         else:
             all_fields = False
 
@@ -477,7 +477,7 @@ class ItkAware(MDApp):
             data["color_danger"] = self.color_to_int(self.root.ids.color_danger.color)
             data["color_warning"] = self.color_to_int(self.root.ids.color_warning.color)
             data["color_safe"] = self.color_to_int(self.root.ids.color_safe.color)
-            data["ewma_alpha"] = float(self.root.ids.ewma_alpha.text) 
+            data["ewma_alpha"] = float(self.root.ids.ewma_alpha.value/20) 
             data["hysterisis"] = int(self.root.ids.hysterisis.value) * 100
             data["time_state"] = int(self.root.ids.time_state.value) * 100
             data["log_level"] = 0
