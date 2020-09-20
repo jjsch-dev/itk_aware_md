@@ -43,7 +43,7 @@ DEVICE_CONNECTED = 2
 DEVICE_READ_PARAMS = 3
 DEVICE_IS_REMOVE = 4
 
-APP_TITLE = "Intelektron Aware - V1.6"
+APP_TITLE = "Intelektron Aware"
 
 class ContentNavigationDrawer(BoxLayout):
     screen_manager = ObjectProperty()
@@ -74,7 +74,6 @@ class ItkAware(MDApp):
         super().__init__(**kwargs)
         self.conn = SerialDevice()
         self.conn_event = None
-        self.firmware_version = None
         self.json_fields = []
         self.conn_state = DEVICE_CLOSE
        # Window.bind(on_keyboard=self.events)
@@ -395,9 +394,11 @@ class ItkAware(MDApp):
             if answ and ("log_level" in answ.keys()):
                 self.json_fields = self.conn.json_cmd(key="info", value="version")
                 if self.json_fields and ("version" in self.json_fields.keys()):
-                    self.firmware_version = self.json_fields["version"]
+                    
+                    self.root.ids.firmware_version.text = self.json_fields["version"]
+                    
                     self.progress_dialog_update(0.8, 
-                                                text="Firmware V" + self.firmware_version,
+                                                text="Firmware V" + self.json_fields["version"],
                                                 title="Leyendo")
                     # Resetea el contador para que muestre el mensaje de version
                     # por unos segundos.
@@ -423,6 +424,7 @@ class ItkAware(MDApp):
 
         self.usb_icon(on_line=False)
         self.progress_dialog_close()
+        self.root.ids.firmware_version.text = ""
 
         if self.conn.is_open:
             Logger.info( "device_close" )
@@ -510,9 +512,6 @@ class ItkAware(MDApp):
             self.save_params_event = Clock.schedule_once(partial(self.save_params_callback, data), 1/10) 
         else:
             toast("Dispositivo desconectado")
-
-    def show_firmware_version(self):
-        toast( "Firmware V" + self.firmware_version )
     
     def show_alert_factory_reset(self):
         # Los parametros no se pueden modificar cuando esta graficando los estados

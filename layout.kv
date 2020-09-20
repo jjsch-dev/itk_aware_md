@@ -12,16 +12,25 @@
             id: avatar
             size_hint: None, None
             size: "56dp", "56dp"
-            source: "images/itk_logo_transparent.png"
+            source: "images/distance_2_red.png"
 
     MDLabel:
-        text: "Configuración"
+        text: "Itk-Aware"
         font_style: "Button"
         size_hint_y: None
         height: self.texture_size[1]
 
     ScrollView:
         MDList:
+            OneLineIconListItem:
+                text: "Acerca"
+                on_press:
+                    root.nav_drawer.set_state("close")
+                    root.screen_manager.current = "app_info"
+                    root.toolbar.title = self.text
+                IconLeftWidget:
+                    icon: "information"
+            
             OneLineIconListItem:
                 text: "Abrir archivo"
                 on_press:
@@ -111,7 +120,8 @@ Screen:
         id: toolbar
         pos_hint: {"top": 1}
         elevation: 10
-        title: "Estado"
+        title: "Información"
+
         left_action_items: [["menu", lambda x: app.on_navdrawer()]]
         right_action_items: [["ethernet-cable-off", lambda x: None], ["backup-restore", lambda x: app.show_alert_factory_reset()]]
 
@@ -121,6 +131,63 @@ Screen:
 
         ScreenManager:
             id: screen_manager
+            Screen:
+                name: "app_info"
+                MDBoxLayout:
+                    padding:20
+                    spacing: 10
+                    orientation: 'vertical'  
+                    MDCard:
+                        orientation: "vertical"
+                        padding: "8dp"
+                        size_hint: 0.8, 0.8
+                        pos_hint: {"center_x": .5, "center_y": .5}
+                        MDLabel:
+                            text: "Versión de la APP"
+                            theme_text_color: "Secondary"
+                            size_hint_y: None
+                            height: self.texture_size[1]
+                        MDSeparator:
+                            height: "1dp"
+                        MDLabel:
+                            text: "2.0"
+                            pos_hint: {"center_x": .5, "center_y": .5}
+                    MDCard:
+                        orientation: "vertical"
+                        padding: "8dp"
+                        size_hint: 0.8, 0.8
+                        pos_hint: {"center_x": .5, "center_y": .5}
+                        MDLabel:
+                            text: "Versión del firmware"
+                            theme_text_color: "Secondary"
+                            size_hint_y: None
+                            height: self.texture_size[1]
+                        MDSeparator:
+                            height: "1dp"
+                        MDLabel:
+                            id: firmware_version
+                            text: ""
+                            pos_hint: {"center_x": .5, "center_y": .5}
+                    
+                    MDCard:
+                        orientation: "vertical"
+                        padding: "8dp"
+                        size_hint: 0.8, 0.8
+                        pos_hint: {"center_x": .5, "center_y": .5}
+                        MDLabel:
+                            text: "Fabricante"
+                            theme_text_color: "Secondary"
+                            size_hint_y: None
+                            height: self.texture_size[1]
+                        MDSeparator:
+                            height: "1dp"
+                        Image:
+                            size_hint: None, None
+                            size: "56dp", "56dp"
+                            source: 'images/itk_logo_transparent.png'
+                        MDLabel:
+                            text: "Intelektron SA"
+                            pos_hint: {"center_x": .5, "center_y": .5}
 
             Screen:
                 name: "open_file"
@@ -367,7 +434,7 @@ Screen:
                         size_hint: 0.8, 0.8
                         pos_hint: {"center_x": .5, "center_y": .5}    
                         MDLabel:
-                            text: "Estados"
+                            text: "Estado"
                             theme_text_color: "Secondary"
                             size_hint_y: None
                             height: self.texture_size[1]
