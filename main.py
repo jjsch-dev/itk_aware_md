@@ -4,6 +4,7 @@
         Author: JS (Juan Schiavoni)
         Date: 17/09/2020 
 '''
+from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ObjectProperty
@@ -24,6 +25,7 @@ from filemanager import MDFileManager
 from serial_device import SerialDevice
 import json
 import ntpath
+from functools import partial
 
 DEVICE_CLOSE = 0
 DEVICE_CONNECTING = 1
@@ -31,7 +33,7 @@ DEVICE_CONNECTED = 2
 DEVICE_READ_PARAMS = 3
 DEVICE_IS_REMOVE = 4
 
-from functools import partial
+APP_TITLE = "Intelektron Aware - V1.6"
 
 class ContentNavigationDrawer(BoxLayout):
     screen_manager = ObjectProperty()
@@ -41,6 +43,9 @@ class ProgressDialog(MDBoxLayout):
     pass
 
 class ItkAware(MDApp):
+    title = APP_TITLE
+    icon = './images/distance_2_red.png'
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.conn = SerialDevice()
@@ -109,7 +114,6 @@ class ItkAware(MDApp):
                     ),
                     MDRaisedButton(               
                         text="Aceptar", 
-                        #text_color=self.theme_cls.primary_color,
                         on_release=self.send_file
                     ),
                 ],
@@ -118,11 +122,32 @@ class ItkAware(MDApp):
         self.dialog.set_normal_height()
         self.dialog.open()
     
+    def set_app_title(self):
+        caption = "{} [{}]".format(APP_TITLE, ntpath.basename(self.path))
+        app = App.get_running_app()
+        app._app_window.set_title(caption)
+
     def close_alert_open_file(self, inst):
         self.dialog.dismiss()
-
+        
     def send_file(self, inst):
         self.dialog.dismiss()
+
+        # Por ahora no se emite un mensaje cuando falta seleccionar un archivo.
+        try:
+            with open(self.path) as stream:
+                line = stream.read()
+            
+            self.json_fields = json.loads( line )
+            
+            if self.set_fields():
+                self.write_params()
+            else:
+                toast("Archivo corrupto")
+            
+            self.set_app_title()
+        except: 
+            toast("Problemas leyendo archivo")
 
     def exit_manager(self, *args):
         '''Called when the user reaches the root of the directory tree.'''
@@ -210,21 +235,25 @@ class ItkAware(MDApp):
 
         return all_fields
 
-    def progress_dialog_start(self, title=None, text=None):
+    def progress_dialog_start(self, value=0, title=None, text=None):
         """Called when a click on a edit button."""
         if not self.progress_dialog:
             self.progress_dialog = MDDialog(
                 type="custom",
                 content_cls=ProgressDialog(),
             )
-        self.progress_dialog_update(0, title, text)
+        self.progress_dialog_update(value, title, text)
         self.progress_dialog.set_normal_height()  
         self.progress_dialog.open()
     
     def progress_dialog_close(self):
-        self.progress_dialog.dismiss()
+        if self.progress_dialog:
+            self.progress_dialog.dismiss()
     
     def progress_dialog_update(self, value, title=None, text=None):
+        if not self.progress_dialog:
+            return
+
         if title:
             self.progress_dialog.title = title
 
@@ -363,7 +392,7 @@ class ItkAware(MDApp):
             self.write_ok_event.cancel()
 
         # Se completo un tercio de la operacion.
-        self.progress_dialog_start(title="Actualizando", text="configuración") 
+        self.progress_dialog_start(1/3, title="Actualizando", text="configuración") 
 
         data = {}
         try:
@@ -458,6 +487,5 @@ class ItkAware(MDApp):
         self.set_fields()
 
         self.write_params()
-
 
 ItkAware().run()
