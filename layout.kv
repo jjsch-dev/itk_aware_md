@@ -383,8 +383,14 @@ Screen:
                             step: 1
                             hint: False
                             on_release: app.write_params()
+            
             Screen:
                 name: "graph_state"
+                MDBoxLayout:
+                    orientation: "vertical"
+                    id: plot_box
+                    padding:20
+                    spacing: 10
 
         MDNavigationDrawer:
             id: nav_drawer

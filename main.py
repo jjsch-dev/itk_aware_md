@@ -593,7 +593,8 @@ class ItkAware(MDApp):
             local_path = str(pathlib.Path().absolute())
             fname_log = os.path.join(local_path, "itk-aware.log")
         
-            plot = PlotDistance(fname_log = fname_log, 
+            plot = PlotDistance(self.root.ids.plot_box,
+                                fname_log = fname_log, 
                                 fpath_image = self.config.get("capture", "fpath"),
                                 fname_image = self.config.get("capture", "fname"),
                                 point_danger = self.json_fields["point_danger"],

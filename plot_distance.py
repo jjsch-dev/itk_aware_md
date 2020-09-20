@@ -14,7 +14,8 @@ import os
 from time import localtime, strftime
 
 class PlotDistance(EventDispatcher):
-    def __init__(self, fname_log, fpath_image, fname_image, point_danger ,point_warning, point_safe, 
+    def __init__(self, plot_box, fname_log, fpath_image, fname_image, 
+                 point_danger ,point_warning, point_safe, 
                  color_danger, color_warning, color_safe, **kwargs):
         self.fname_log = fname_log
         self.fpath_image = fpath_image
@@ -52,7 +53,7 @@ class PlotDistance(EventDispatcher):
         self.ax.set_xlim(0, self.plot_max_len)
         self.ax.set_ylim(0, 8500)
         
-        self.box = BoxLayout(orientation = "vertical", padding = 10, spacing = 10)
+        self.box = plot_box #BoxLayout(orientation = "vertical", padding = 10, spacing = 10)
         self.button_layout = BoxLayout(size_hint = (1, 0.1), orientation = "horizontal") 
         self.play_button = ToggleButton(text = "Comenzar") 
         self.log_button = ToggleButton(text = "Log")
@@ -161,18 +162,18 @@ class PlotDistance(EventDispatcher):
             self.fig.canvas.draw()
 
     def start(self):
-        self.popup = Popup(title = "Grafica de detección y distancia", 
-                           content = self.box, 
-                           size_hint = (.9, .9),
-                           auto_dismiss = False) 
+        # self.popup = Popup(title = "Grafica de detección y distancia", 
+        #                    content = self.box, 
+        #                    size_hint = (.9, .9),
+        #                    auto_dismiss = False) 
         
         self.exit_button.bind(on_press = self.on_exit)
 
-        self.popup.open() 
+       # self.popup.open() 
     
     def on_plot_close(self):
         pass
 
     def on_exit(self, obj):
-        self.popup.dismiss()
+        #self.popup.dismiss()
         self.dispatch('on_plot_close')
