@@ -18,6 +18,7 @@ from kivymd.app import MDApp
 #from kivymd.uix.filemanager import MDFileManager
 from kivymd.toast import toast
 from kivymd.uix.button import MDFlatButton, MDRaisedButton
+from kivymd.uix.slider import MDSlider
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.boxlayout import MDBoxLayout
 
@@ -48,6 +49,20 @@ class ContentNavigationDrawer(BoxLayout):
 
 class ProgressDialog(MDBoxLayout):
     pass
+
+class SliderOnRelease(MDSlider):
+    def __init__(self, **kwargs):
+        self.register_event_type('on_release')
+        super(SliderOnRelease, self).__init__(**kwargs)
+
+    def on_release(self):
+        pass
+
+    def on_touch_up(self, touch):
+        super(SliderOnRelease, self).on_touch_up(touch)
+        if touch.grab_current == self:
+            self.dispatch('on_release')
+            return True
 
 class ItkAware(MDApp):
     title = APP_TITLE
@@ -243,17 +258,17 @@ class ItkAware(MDApp):
             all_fields = False
 
         if "point_danger" in self.json_fields:
-            self.root.ids.point_danger.text = str(self.json_fields["point_danger"])
+            self.root.ids.point_danger.value = str(self.json_fields["point_danger"] / 100)
         else:
             all_fields = False
 
         if "point_warning" in self.json_fields:
-            self.root.ids.point_warning.text = str(self.json_fields["point_warning"])
+            self.root.ids.point_warning.value = str(self.json_fields["point_warning"] / 100)
         else:
             all_fields = False
 
         if "point_safe" in self.json_fields:
-            self.root.ids.point_safe.text = str(self.json_fields["point_safe"])
+            self.root.ids.point_safe.value = str(self.json_fields["point_safe"] / 100)
         else:
             all_fields = False
 
@@ -456,9 +471,9 @@ class ItkAware(MDApp):
             data["buzzer"] = self.root.ids.buzzer_enable.active
             data["buzzer_ton"] = int(self.root.ids.buzzer_ton.text)
             data["buzzer_toff"] = int(self.root.ids.buzzer_toff.text)
-            data["point_danger"] = int(self.root.ids.point_danger.text)
-            data["point_warning"] = int(self.root.ids.point_warning.text)
-            data["point_safe"] = int(self.root.ids.point_safe.text)
+            data["point_danger"] = int(self.root.ids.point_danger.value) * 100
+            data["point_warning"] = int(self.root.ids.point_warning.value) * 100
+            data["point_safe"] = int(self.root.ids.point_safe.value) * 100
             data["color_danger"] = self.color_to_int(self.root.ids.color_danger.color)
             data["color_warning"] = self.color_to_int(self.root.ids.color_warning.color)
             data["color_safe"] = self.color_to_int(self.root.ids.color_safe.color)
