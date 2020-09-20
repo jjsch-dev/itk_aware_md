@@ -293,12 +293,12 @@ class ItkAware(MDApp):
             all_fields = False
 
         if "hysterisis" in self.json_fields:
-            self.root.ids.hysterisis.text = str(self.json_fields["hysterisis"]) 
+            self.root.ids.hysterisis.value = str(self.json_fields["hysterisis"] / 100) 
         else:
             all_fields = False
 
         if "time_state" in self.json_fields:
-            self.root.ids.time_state.text = str(self.json_fields["time_state"])  
+            self.root.ids.time_state.value = str(self.json_fields["time_state"] / 100)  
         else:
             all_fields = False
 
@@ -478,8 +478,8 @@ class ItkAware(MDApp):
             data["color_warning"] = self.color_to_int(self.root.ids.color_warning.color)
             data["color_safe"] = self.color_to_int(self.root.ids.color_safe.color)
             data["ewma_alpha"] = float(self.root.ids.ewma_alpha.text) 
-            data["hysterisis"] = int(self.root.ids.hysterisis.text)
-            data["time_state"] = int(self.root.ids.time_state.text)
+            data["hysterisis"] = int(self.root.ids.hysterisis.value) * 100
+            data["time_state"] = int(self.root.ids.time_state.value) * 100
             data["log_level"] = 0
         except:
             toast("Parámetros fuera de rango")

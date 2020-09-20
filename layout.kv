@@ -181,13 +181,14 @@ Screen:
                         MDSeparator:
                             height: "1dp"
                         MDLabel:
-                            text: "Distancia del punto {:.0f}00 mm".format(point_danger.value)
+                            text: "Distancia del punto {:.0f} mm".format(point_danger.value * 100)
                         SliderOnRelease:
                             id: point_danger
                             min: 5
                             max: point_warning.value - 1
                             value: 5
-                            hint: False  
+                            hint: False 
+                            step: 1 
                             on_release: app.write_params()
                     MDCard:
                         orientation: "vertical"
@@ -202,13 +203,14 @@ Screen:
                         MDSeparator:
                             height: "1dp"
                         MDLabel:
-                            text: "Distancia del punto {:.0f}00 mm".format(point_warning.value)
+                            text: "Distancia del punto {:.0f} mm".format(point_warning.value * 100)
                         SliderOnRelease:
                             id: point_warning
                             min: point_danger.value + 1
                             max: point_safe.value - 1
                             value: 5
                             hint: False
+                            step: 1
                             on_release: app.write_params()
                     MDCard:
                         orientation: "vertical"
@@ -223,12 +225,13 @@ Screen:
                         MDSeparator:
                             height: "1dp"
                         MDLabel:
-                            text: "Distancia del punto {:.0f}00 mm".format(point_safe.value)
+                            text: "Distancia del punto {:.0f} mm".format(point_safe.value * 100)
                         SliderOnRelease:
                             id: point_safe
                             min: point_warning.value + 1
                             max: 20
                             value: 5
+                            step: 1
                             on_release: app.write_params()
             Screen:
                 name: "buzzer"
@@ -334,12 +337,22 @@ Screen:
                             height: self.texture_size[1]
                         MDSeparator:
                             height: "1dp"
+                        # MDLabel:
+                        #     text: "Distancia en mm"
+                        # MDTextField:
+                        #     id: hysterisis
+                        #     text: ""
+                        #     on_text_validate: app.write_params()
                         MDLabel:
-                            text: "Distancia en mm"
-                        MDTextField:
+                            text: "Distancia {:.0f} mm".format(hysterisis.value*100)
+                        SliderOnRelease:
                             id: hysterisis
-                            text: ""
-                            on_text_validate: app.write_params()
+                            min: 0
+                            max: 10
+                            value: 0
+                            step: 1
+                            hint: False
+                            on_release: app.write_params()
                     MDCard:
                         orientation: "vertical"
                         padding: "8dp"
@@ -353,11 +366,16 @@ Screen:
                         MDSeparator:
                             height: "1dp"
                         MDLabel:
-                            text: "Duración en mS"
-                        MDTextField:
+                            text: "Duración {:2.2f} Seg".format(time_state.value/10)
+                        SliderOnRelease:
                             id: time_state
-                            text: ""
-                            on_text_validate: app.write_params()
+                            min: 0
+                            max: 20
+                            value: 0
+                            step: 1
+                            hint: False
+                            on_release: app.write_params()
+
         MDNavigationDrawer:
             id: nav_drawer
 
