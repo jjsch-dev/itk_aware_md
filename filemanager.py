@@ -705,6 +705,8 @@ class MDFileManager(ThemableBehavior, MDFloatLayout):
 
         if len(self.selection) > 0:
             self.select_path(self.selection)
+        elif self.edit_name:
+            self.select_path(os.path.join(self.current_path, self.current_filename))
         else:
             self.select_path(os.path.join(self.current_path))
     

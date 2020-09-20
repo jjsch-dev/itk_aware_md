@@ -12,6 +12,7 @@ from kivy.clock import Clock
 from kivy.logger import Logger
 from kivy.graphics import Color
 from kivy import utils
+from kivy.utils import platform
 
 from kivymd.app import MDApp
 #from kivymd.uix.filemanager import MDFileManager
@@ -25,7 +26,13 @@ from filemanager import MDFileManager
 from serial_device import SerialDevice
 import json
 import ntpath
+import pathlib
 from functools import partial
+import os
+
+if platform == 'android':
+    from android.storage import primary_external_storage_path
+    from android.permissions import request_permissions, Permission
 
 DEVICE_CLOSE = 0
 DEVICE_CONNECTING = 1
@@ -69,23 +76,52 @@ class ItkAware(MDApp):
     def on_start(self):
         self.conn_event = Clock.schedule_once(self.conn_callback, 1/100)
         
+        self.path = self.config.get('last-path', 'path')
+        
+        if not self.path:
+            if platform == 'android':
+                request_permissions([Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE])
+
+                dir_primary = primary_external_storage_path()
+                self.path = os.path.join(dir_primary, 'Download')
+            else:
+                # Carga el ultimo path.
+                self.path = str(pathlib.Path().absolute())
+        
+        Logger.info( "folder path: %s", self.path )
+        
     def build(self):
         return Builder.load_file("layout.kv")
 
     def build_config(self, config):
-        config.setdefaults('serial', {'port': ''})
+        config.setdefaults('serial', {'port':''})
         config.setdefaults('capture', {'fpath':'capture/', 'fname':'log_aware'})
         config.setdefaults('device-log', {'fpath':'log/', 'fname':'aware.log'})
         config.setdefaults('parameters-file', {'name':'aware_cfg', 'ext':'json', 'index':0})
+        config.setdefaults('last-path', {'path':''})
+
+    def get_path(self):
+        if not os.path.isdir(self.path):
+            return os.path.dirname(self.path)
+        
+        return self.path
 
     def file_manager_open(self):
         self.file_manager.edit_name = False
-        self.file_manager.show('/home/jjsch/Desktop', "")  # output manager to the screen
+        self.file_manager.show(self.get_path())  
         self.manager_open = True
 
     def file_manager_save(self):
+        # Genera un archivo con identificador incremental.
+        index = self.config.getint('parameters-file', 'index')
+        fname = "{}_{}.{}".format(self.config.get('parameters-file', 'name'), 
+                                index, 
+                                self.config.get('parameters-file', 'ext') )
+        self.config.set('parameters-file', 'index', index + 1)
+        self.config.write()
+
         self.file_manager.edit_name = True
-        self.file_manager.show('/home/jjsch/Desktop', "test.js")  # output manager to the screen
+        self.file_manager.show(self.get_path(), fname)  
         self.manager_open = True
 
     def select_path(self, path):
@@ -98,8 +134,13 @@ class ItkAware(MDApp):
         self.path = path
         self.exit_manager()
 
+        self.config.set('last-path', 'path', self.get_path())
+        self.config.write()
+
         if not self.file_manager.edit_name:
             self.show_alert_open_file()
+        else:
+            self.save_file()
               
     def show_alert_open_file(self):
         if not self.dialog:
@@ -148,6 +189,22 @@ class ItkAware(MDApp):
             self.set_app_title()
         except: 
             toast("Problemas leyendo archivo")
+    
+    def save_file(self):
+        if not self.conn.is_open: 
+            toast("Dispositivo desconectado")
+            return
+
+        if not self.valid_parameters:
+            toast("Parametros fuera de rango") 
+
+        try:
+            with open(self.path, 'w') as stream:
+                stream.write(json.dumps(self.json_fields, indent=4, sort_keys=True))
+            
+            self.set_app_title()
+        except:
+           toast("Problemas creando el archivo") 
 
     def exit_manager(self, *args):
         '''Called when the user reaches the root of the directory tree.'''
