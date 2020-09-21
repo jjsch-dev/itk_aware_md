@@ -1,2 +1,9 @@
 # Ignora el directorio de compilacion de la APP para android.
 /.buildozer/
+
+# Ignora los directorios que genera pyinstaller para el deploy en win64 
+/dist/
+/build/
+
+# Cache de python
+/__pycache__/
