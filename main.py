@@ -93,6 +93,14 @@ class ItkAware(MDApp):
         self.plot = None
 
     def on_start(self):
+        # La APP de android no soporta la libreria matplot, por consiguiente
+        # se elimina del listado.
+        if platform == "android":
+            for widget in self.root.ids.content_nav_drawer.ids.drawer_list.children:
+                if widget.name == "plot_state":
+                    self.root.ids.content_nav_drawer.ids.drawer_list.remove_widget(widget)
+                    break
+
         self.conn_event = Clock.schedule_once(self.conn_callback, 1/100)
         
         self.path = self.config.get('last-path', 'path')

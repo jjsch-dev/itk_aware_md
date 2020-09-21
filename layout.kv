@@ -22,10 +22,12 @@
 
     ScrollView:
         MDList:
+            id: drawer_list
             OneLineIconListItem:
                 text: "Acerca"
                 title: "Información"
                 id: app_info_item
+                name: "about"
                 on_press:
                     root.nav_drawer.set_state("close")
                     root.screen_manager.current = "app_info"
@@ -35,6 +37,7 @@
             
             OneLineIconListItem:
                 text: "Abrir archivo"
+                name: "open_file"
                 on_press:
                     root.nav_drawer.set_state("close")
                     root.screen_manager.current = "app_info"
@@ -45,6 +48,7 @@
             
             OneLineIconListItem:
                 text: "Salvar archivo"
+                name: "save_file"
                 on_press: 
                     root.nav_drawer.set_state("close")
                     root.screen_manager.current = "app_info"
@@ -55,6 +59,7 @@
 
             OneLineIconListItem:
                 text: "Peligro"
+                name: "leds_danger"
                 on_press: 
                     root.nav_drawer.set_state("close")
                     root.screen_manager.current = "leds_danger"
@@ -64,6 +69,7 @@
             
             OneLineIconListItem:
                 text: "Precaución"
+                name: "leds_warning"
                 on_press: 
                     root.nav_drawer.set_state("close")
                     root.screen_manager.current = "leds_warning"
@@ -73,6 +79,7 @@
             
             OneLineIconListItem:
                 text: "Seguro"
+                name: "led_safe"
                 on_press: 
                     root.nav_drawer.set_state("close")
                     root.screen_manager.current = "leds_safe"
@@ -82,6 +89,7 @@
 
             OneLineIconListItem:
                 text: "Zonas"
+                name: "distance"
                 on_press: 
                     root.nav_drawer.set_state("close")
                     root.screen_manager.current = "distance"
@@ -91,6 +99,7 @@
             
             OneLineIconListItem:
                 text: "Sonido"
+                name: "sound"
                 on_press: 
                     root.nav_drawer.set_state("close")
                     root.screen_manager.current = "buzzer"
@@ -100,6 +109,7 @@
             
             OneLineIconListItem:
                 text: "Avanzado"
+                name: "advance"
                 on_press: 
                     root.nav_drawer.set_state("close")
                     root.screen_manager.current = "advance"
@@ -109,6 +119,7 @@
             
             OneLineIconListItem:
                 text: "Graficar estados"
+                name: "plot_state"
                 on_press: 
                     root.nav_drawer.set_state("close")
                     root.screen_manager.current = "graph_state"
@@ -461,10 +472,11 @@ Screen:
             id: nav_drawer
 
             ContentNavigationDrawer:
+                id: content_nav_drawer
                 screen_manager: screen_manager.__self__
                 nav_drawer: nav_drawer.__self__
-                toolbar: toolbar.__self__
-                buzzer_enable: buzzer_enable.__self__
+                #toolbar: toolbar.__self__
+                #buzzer_enable: buzzer_enable.__self__
 
 <ProgressDialog>
     orientation: "vertical"
