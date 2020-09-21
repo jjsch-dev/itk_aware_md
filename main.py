@@ -478,14 +478,14 @@ class ItkAware(MDApp):
             toast("Dispositivo desconectado")
 
     def write_params(self):
+        if not self.conn.is_open:
+            return
+
         if self.save_params_event:
             self.save_params_event.cancel()
        
         if self.write_ok_event:
             self.write_ok_event.cancel()
-
-        # Se completo un tercio de la operacion.
-        self.progress_dialog_start(1/3, title="Actualizando", text="configuración") 
 
         data = {}
         try:
@@ -506,25 +506,13 @@ class ItkAware(MDApp):
             toast("Parámetros fuera de rango")
             return
 
-        #if self.ids.point_danger.min_value > data["point_danger" ] < self.ids.point_danger.max_value:
-        #    toast("Peligro fuera de rango")
-
-        if data["point_danger"] > data["point_warning"]:
-            toast("Peligro debe ser menor que precaución")
-            return
-
-        if  data["point_warning"] > data["point_safe"]:
-            toast("Precaución debe ser menor que seguro")
-            return
-            
-        if self.conn.is_open: 
-            self.save_params_event = Clock.schedule_once(partial(self.save_params_callback, data), 1/10) 
-        else:
-            toast("Dispositivo desconectado")
+        # Se completo un tercio de la operacion.
+        self.progress_dialog_start(1/3, title="Actualizando", text="configuración")             
+        self.save_params_event = Clock.schedule_once(partial(self.save_params_callback, data), 1/10) 
     
     def show_alert_factory_reset(self):
         # Los parametros no se pueden modificar cuando esta graficando los estados
-        if self.root.ids.screen_manager.current == "graph_state":
+        if self.root.ids.screen_manager.current == "graph_state" or not self.conn.is_open:
             return
 
         if not self.dialog:
@@ -552,10 +540,6 @@ class ItkAware(MDApp):
 
     def on_load_default(self, inst):
         self.dialog.dismiss()
-
-        if not self.conn.is_open: 
-            toast("Dispositivo desconectado")
-            return
 
         if self.json_fields:
             self.json_fields.clear()

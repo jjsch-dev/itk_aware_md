@@ -318,6 +318,7 @@ Screen:
                             max: 20
                             value: 5
                             step: 1
+                            hint: False
                             on_release: app.write_params()
             Screen:
                 name: "buzzer"
@@ -475,7 +476,7 @@ Screen:
                 id: content_nav_drawer
                 screen_manager: screen_manager.__self__
                 nav_drawer: nav_drawer.__self__
-                #toolbar: toolbar.__self__
+                toolbar: toolbar.__self__
                 #buzzer_enable: buzzer_enable.__self__
 
 <ProgressDialog>
