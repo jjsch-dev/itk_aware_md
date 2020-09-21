@@ -13,6 +13,7 @@ from kivy.logger import Logger
 from kivy.graphics import Color
 from kivy import utils
 from kivy.utils import platform
+from kivy.core.window import Window
 
 from kivymd.app import MDApp
 #from kivymd.uix.filemanager import MDFileManager
@@ -76,7 +77,7 @@ class ItkAware(MDApp):
         self.conn_event = None
         self.json_fields = []
         self.conn_state = DEVICE_CLOSE
-       # Window.bind(on_keyboard=self.events)
+        Window.bind(on_keyboard=self.events)
         self.manager_open = False
         self.write_ok_event = None
         self.save_params_event = None
@@ -638,5 +639,12 @@ class ItkAware(MDApp):
         
         if self.plot:
             self.plot.close()
+    
+    def events(self, instance, keyboard, keycode, text, modifiers):
+            '''Called when buttons are pressed on the mobile device.'''
+            if keyboard in (1001, 27):
+                if self.manager_open:
+                    self.file_manager.back()
+            return True
 
 ItkAware().run()
