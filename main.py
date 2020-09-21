@@ -100,6 +100,8 @@ class ItkAware(MDApp):
                 if widget.name == "plot_state":
                     self.root.ids.content_nav_drawer.ids.drawer_list.remove_widget(widget)
                     break
+        
+        self.operative_system()
 
         self.conn_event = Clock.schedule_once(self.conn_callback, 1/100)
         
@@ -138,6 +140,18 @@ class ItkAware(MDApp):
             return os.path.dirname(self.path)
         
         return self.path
+
+    def operative_system(self):
+        self.root.ids.os_version.secondary_text = platform
+
+        if platform == 'linux':
+            self.root.ids.os_version_icon.source = "images/Tux.png"
+        elif platform == 'android':
+            self.root.ids.os_version_icon.source = "images/Android_robot.png" 
+        elif platform == 'win':
+            self.root.ids.os_version_icon.source = "images/Windows_2012.png"
+        else:
+            self.root.ids.os_version_icon.source = ""  
 
     def file_manager_open(self):
         self.file_manager.edit_name = False
@@ -404,7 +418,7 @@ class ItkAware(MDApp):
                 self.json_fields = self.conn.json_cmd(key="info", value="version")
                 if self.json_fields and ("version" in self.json_fields.keys()):
                     
-                    self.root.ids.firmware_version.text = self.json_fields["version"]
+                    self.root.ids.firmware_version.secondary_text = self.json_fields["version"]
                     
                     self.progress_dialog_update(0.8, 
                                                 text="Firmware V" + self.json_fields["version"],
@@ -433,7 +447,7 @@ class ItkAware(MDApp):
 
         self.usb_icon(on_line=False)
         self.progress_dialog_close()
-        self.root.ids.firmware_version.text = ""
+        self.root.ids.firmware_version.secondary_text = "desconocida"
 
         if self.conn.is_open:
             Logger.info( "device_close" )
