@@ -243,7 +243,7 @@ class ItkAware(MDApp):
             return
 
         if not self.valid_parameters:
-            toast("Parametros fuera de rango") 
+            toast("Parámetros fuera de rango") 
 
         try:
             with open(self.path, 'w') as stream:
@@ -260,7 +260,7 @@ class ItkAware(MDApp):
         self.file_manager.close()
 
     def int_to_color(self, val):
-        val = '{:06x}'.format(val, 'x') 
+        val = '{:06x}'.format(val) 
         kivy_color = utils.get_color_from_hex(val)
         return kivy_color
 
@@ -596,7 +596,7 @@ class ItkAware(MDApp):
                 return
 
             if not self.valid_parameters:
-                toast("Lea los parametros del equipo")
+                toast("Parámetros fuera de rango")
                 return
                 
             if not self.is_level_json():
@@ -622,7 +622,7 @@ class ItkAware(MDApp):
             
             def update_plot(self, obj):
                 try:
-                    for i in range(20):
+                    for _ in range(20):
                         log_fields = self.conn.json_answ(key="info", value="log", timeout=1/100)
                         # Verifica que el JSON retornado contenga los campos
                         # necesarios para graficar.
