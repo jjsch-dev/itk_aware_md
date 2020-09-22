@@ -48,7 +48,7 @@ requirements.source.kivymd = ../../kivymd
 #garden_requirements =
 
 # (str) Presplash of the application
-#presplash.filename = %(source.dir)s/data/presplash.png
+presplash.filename = %(source.dir)s/images/distance_2_red.png
 
 # (str) Icon of the application
 icon.filename = %(source.dir)s/images/distance_2_red.png
