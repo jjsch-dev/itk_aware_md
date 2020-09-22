@@ -179,7 +179,14 @@ class ItkAware(MDApp):
         :type path: str;
         :param path: path to the selected directory or file;
         '''
+        # Si el nombre del archivo no tiene la extension json, se la agrega.
+        if self.file_manager.current_filename:
+            filename, file_extension = os.path.splitext(self.file_manager.current_filename)
+            if filename and file_extension != ".json":
+                path += ".json"
+
         self.path = path
+        
         self.exit_manager()
 
         self.config.set('last-path', 'path', self.get_path())
