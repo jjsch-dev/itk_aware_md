@@ -78,7 +78,7 @@
                     icon: "led-on"
             
             OneLineIconListItem:
-                text: "Seguro"
+                text: "Segura"
                 name: "led_safe"
                 on_press: 
                     root.nav_drawer.set_state("close")
@@ -179,66 +179,14 @@ Screen:
                         
                         TwoLineAvatarListItem:
                             id: os_version
-                            text: "Sitema operativo"
+                            text: "Sistema operativo"
                             secondary_text: ""
 
                             ImageLeftWidget:
                                 id: os_version_icon
                                 size: "56dp", "56dp"
                                 source: ''
-
-                    # MDCard:
-                    #     orientation: "vertical"
-                    #     padding: "8dp"
-                    #     size_hint: 0.8, 0.8
-                    #     pos_hint: {"center_x": .5, "center_y": .5}
-                    #     MDLabel:
-                    #         text: "Versión de la APP"
-                    #         theme_text_color: "Secondary"
-                    #         size_hint_y: None
-                    #         height: self.texture_size[1]
-                    #     MDSeparator:
-                    #         height: "1dp"
-                    #     MDLabel:
-                    #         text: "2.0"
-                    #         pos_hint: {"center_x": .5, "center_y": .5}
-                    # MDCard:
-                    #     orientation: "vertical"
-                    #     padding: "8dp"
-                    #     size_hint: 0.8, 0.8
-                    #     pos_hint: {"center_x": .5, "center_y": .5}
-                    #     MDLabel:
-                    #         text: "Versión del firmware"
-                    #         theme_text_color: "Secondary"
-                    #         size_hint_y: None
-                    #         height: self.texture_size[1]
-                    #     MDSeparator:
-                    #         height: "1dp"
-                    #     MDLabel:
-                    #         id: firmware_version
-                    #         text: ""
-                    #         pos_hint: {"center_x": .5, "center_y": .5}
                     
-                    # MDCard:
-                    #     orientation: "vertical"
-                    #     padding: "8dp"
-                    #     size_hint: 0.8, 0.8
-                    #     pos_hint: {"center_x": .5, "center_y": .5}
-                    #     MDLabel:
-                    #         text: "Fabricante"
-                    #         theme_text_color: "Secondary"
-                    #         size_hint_y: None
-                    #         height: self.texture_size[1]
-                    #     MDSeparator:
-                    #         height: "1dp"
-                    #     Image:
-                    #         size_hint: None, None
-                    #         size: "56dp", "56dp"
-                    #         source: 'images/itk_logo_transparent.png'
-                    #     MDLabel:
-                    #         text: "Intelektron SA"
-                    #         pos_hint: {"center_x": .5, "center_y": .5}
-
             Screen:
                 name: "leds_danger"
                 MDBoxLayout:
@@ -459,7 +407,7 @@ Screen:
                         size_hint: 0.8, 0.8
                         pos_hint: {"center_x": .5, "center_y": .5}
                         MDLabel:
-                            text: "Histerisis"
+                            text: "Histéresis"
                             theme_text_color: "Secondary"
                             size_hint_y: None
                             height: self.texture_size[1]

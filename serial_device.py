@@ -20,8 +20,6 @@ import time
 import threading
 from queue import Queue
 
-#from message_box import MessageBox
-
 class SerialDevice():
     def __init__(self, *args, **kwargs):
         self.device = None
@@ -96,7 +94,7 @@ class SerialDevice():
             self.read_thread = threading.Thread(target = self.read_msg_thread)
             self.read_thread.start()
         
-        # Guarda el por para detectar desconexion de USB
+        # Guarda el puerto para detectar desconexion de USB
         self.port = port 
         
         return True
@@ -104,7 +102,7 @@ class SerialDevice():
     def close(self):
         try:
             if self.is_open:
-                # Le avisa al thread de recepcion que hay un proceso de cierre.
+                # Le informa al thread de recepcion que la conexion se cerro.
                 self.close_event.set()
                 with self.port_thread_lock:
                     Logger.info( "Serial device close" )
