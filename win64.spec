@@ -33,7 +33,7 @@ exe = EXE(pyz,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
-          console=True,
+          console=False,
           icon='images/distance_2_red.ico' )
 coll = COLLECT(exe,
                a.binaries,
