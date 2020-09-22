@@ -81,7 +81,8 @@ class ItkAware(MDApp):
         self.manager_open = False
         self.write_ok_event = None
         self.save_params_event = None
-        self.dialog = None
+        self.open_dialog = None
+        self.reset_dialog = None
         self.file_manager = MDFileManager(
            exit_manager=self.exit_manager,
            select_path=self.select_path,
@@ -190,8 +191,8 @@ class ItkAware(MDApp):
             self.save_file()
               
     def show_alert_open_file(self):
-        if not self.dialog:
-            self.dialog = MDDialog(
+        if not self.open_dialog:
+            self.open_dialog = MDDialog(
                 text="Esta seguro que desea actualizar el equipo?",
                 buttons=[
                     
@@ -206,9 +207,10 @@ class ItkAware(MDApp):
                     ),
                 ],
             )
-        self.dialog.title = "Cargar [{}]".format(ntpath.basename(self.path))
-        self.dialog.set_normal_height()
-        self.dialog.open()
+        
+        self.open_dialog.title = "Cargar [{}]".format(ntpath.basename(self.path))
+        self.open_dialog.set_normal_height()
+        self.open_dialog.open()
     
     def set_app_title(self):
         caption = "{} [{}]".format(APP_TITLE, ntpath.basename(self.path))
@@ -216,10 +218,10 @@ class ItkAware(MDApp):
         app._app_window.set_title(caption)
 
     def close_alert_open_file(self, inst):
-        self.dialog.dismiss()
+        self.open_dialog.dismiss()
         
     def send_file(self, inst):
-        self.dialog.dismiss()
+        self.open_dialog.dismiss()
 
         # Por ahora no se emite un mensaje cuando falta seleccionar un archivo.
         try:
@@ -529,8 +531,8 @@ class ItkAware(MDApp):
         if self.root.ids.screen_manager.current == "graph_state" or not self.conn.is_open:
             return
 
-        if not self.dialog:
-            self.dialog = MDDialog(
+        if not self.reset_dialog:
+            self.reset_dialog = MDDialog(
                 title="Resetear a fabrica?",
                 text="Se cargaran en el dispositivo los valores de fabrica.",
                 buttons=[
@@ -546,14 +548,14 @@ class ItkAware(MDApp):
                     ),
                 ],
             )
-        self.dialog.set_normal_height()
-        self.dialog.open()
+        self.reset_dialog.set_normal_height()
+        self.reset_dialog.open()
     
     def close_alert_factory(self, inst):
-        self.dialog.dismiss()
+        self.reset_dialog.dismiss()
 
     def on_load_default(self, inst):
-        self.dialog.dismiss()
+        self.reset_dialog.dismiss()
 
         if self.json_fields:
             self.json_fields.clear()
