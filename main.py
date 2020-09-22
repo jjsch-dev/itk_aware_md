@@ -119,8 +119,9 @@ class ItkAware(MDApp):
                 self.path = str(pathlib.Path().absolute())
         
         Logger.info( "folder path: %s", self.path )
-        
+    
     def build(self):
+        Window.bind(on_request_close=self.on_request_close)
         return Builder.load_file("layout.kv")
 
     def build_config(self, config):
@@ -130,6 +131,15 @@ class ItkAware(MDApp):
         config.setdefaults('parameters-file', {'name':'aware_cfg', 'ext':'json', 'index':0})
         config.setdefaults('last-path', {'path':''})
 
+    def on_request_close(self, *args):
+        # Para que la APP se pueda cerrar gentilmente, hay que cerrar la conexion al
+        # puerto serie.
+        if self.conn_event:
+            self.conn_event.cancel()
+
+        self.device_close()
+        self.stop()
+ 
     def on_navdrawer(self):
         self.root.ids.nav_drawer.set_state("open")
         
