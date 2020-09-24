@@ -140,6 +140,17 @@ class ItkAware(MDApp):
         self.device_close()
         self.stop()
  
+    def on_pause(self):
+        if self.conn_event:
+            self.conn_event.cancel()
+
+        return True
+
+    def on_resume(self):
+        self.device_close()
+
+        self.conn_event = Clock.schedule_once(self.conn_callback, 1/100)
+
     def on_navdrawer(self):
         self.root.ids.nav_drawer.set_state("open")
         
