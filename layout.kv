@@ -260,6 +260,7 @@ Screen:
                             value: 5
                             hint: False 
                             step: 1 
+                            thumb_color_down: color_danger.color
                             on_release: app.write_params()
                     MDCard:
                         orientation: "vertical"
@@ -282,6 +283,7 @@ Screen:
                             value: 5
                             hint: False
                             step: 1
+                            thumb_color_down: color_warning.color
                             on_release: app.write_params()
                     MDCard:
                         orientation: "vertical"
@@ -304,6 +306,7 @@ Screen:
                             value: 5
                             step: 1
                             hint: False
+                            thumb_color_down: color_safe.color
                             on_release: app.write_params()
             Screen:
                 name: "buzzer"
@@ -325,9 +328,9 @@ Screen:
                             height: "1dp"
                         MDLabel:
                             text: "Activa el buzzer"
-                        MDCheckbox:
+                        MDSwitch:
                             id: buzzer_enable
-                            on_release: app.write_params()
+                            on_active: app.write_params()
 
                     MDCard:
                         orientation: "vertical"
