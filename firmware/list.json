@@ -1,0 +1,5 @@
+{ 
+"list":[
+    {"version": "1.10", "change-log": "watchdog activado", "filename": "cartel_1.10.hex" },
+    {"version": "1.9", "change-log": "primer version", "filename": "cartel_1.9.hex" }]
+}

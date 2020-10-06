@@ -116,6 +116,17 @@
                     root.toolbar.title = self.text
                 IconLeftWidget:
                     icon: "tune"
+
+            OneLineIconListItem:
+                text: "Actualizar"
+                name: "upgrade_firmware"
+                on_press: 
+                    root.nav_drawer.set_state("close")
+                    root.screen_manager.current = "upgrade_firmware"
+                    root.toolbar.title = self.text
+                    app.on_upgrade()
+                IconLeftWidget:
+                    icon: "cpu-32-bit"
             
             OneLineIconListItem:
                 text: "Graficar estados"
@@ -456,7 +467,42 @@ Screen:
                     id: plot_box
                     padding:20
                     spacing: 10
+            
+            
+            Screen:
+                name: "upgrade_firmware"
+                MDBoxLayout:
+                    orientation: "vertical"
+                    padding:20
+                    spacing: 10
 
+                    MDList:
+                        id: fimware_list 
+                        pos_hint: {"top": 1}
+
+                    MDLabel:
+                        id: firmware_filename
+                        halign:"center"
+                        text: "Seleccionar versión"
+                    
+                    MDProgressBar:
+                        id: progress
+                        value: 0
+                        min: 0
+                        max: 1
+
+                    MDLabel:
+                        halign:"center"
+                        id: status
+                        text:"Desconectado"
+                        
+                    MDRaisedButton:
+                        id: upgrade_button
+                        md_bg_color: 1, 0, 1, 1
+                        text: "Actualizar"
+                        pos_hint: {"center_x": .5, "center_y": .5} 
+                        on_release: app.upgrade_firmware()
+ 
         MDNavigationDrawer:
             id: nav_drawer
 

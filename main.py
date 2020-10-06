@@ -16,7 +16,7 @@ from kivy.utils import platform
 from kivy.core.window import Window
 
 from kivymd.app import MDApp
-#from kivymd.uix.filemanager import MDFileManager
+from kivymd.uix.list import TwoLineListItem
 from kivymd.toast import toast
 from kivymd.uix.button import MDFlatButton, MDRaisedButton
 from kivymd.uix.slider import MDSlider
@@ -25,12 +25,19 @@ from kivymd.uix.boxlayout import MDBoxLayout
 
 from filemanager import MDFileManager
 
+from intelhex import IntelHex
+from intelhex import AddressOverlapError
+from arduinobootloader import ArduinoBootloader
+
 from serial_device import SerialDevice
 import json
 import ntpath
 import pathlib
 from functools import partial
 import os
+from functools import partial
+import threading
+from queue import Queue
 
 if platform == 'android':
     from android.storage import primary_external_storage_path
@@ -92,6 +99,12 @@ class ItkAware(MDApp):
         self.progress_dialog = None
         self.event_plot = None
         self.plot = None
+        self.firmware_list = None
+        self.ih = IntelHex()
+        self.ab = ArduinoBootloader()
+        self.working_thread = None
+        self.progress_queue = Queue(100)
+        self.upgrade_dialog = None
 
     def on_start(self):
         # La APP de android no soporta la libreria matplot, por consiguiente
@@ -616,6 +629,172 @@ class ItkAware(MDApp):
                 return True
         except:
             return False
+
+    def on_upgrade(self):
+        
+        if self.firmware_list is None:
+            local_path = str(pathlib.Path().absolute())
+            filename = os.path.join(local_path, "firmware/list.json")
+
+            with open(filename) as stream:
+                json_list = json.loads( stream.read() )
+
+            self.firmware_list = json_list["list"]
+
+            for item in self.firmware_list:
+                self.root.ids.fimware_list.add_widget(
+                    TwoLineListItem(text=item["version"],
+                                    secondary_text=item["change-log"],
+                                    on_release=partial(self.on_upgrade_set_fname, item["filename"]))
+                )
+    
+    def on_upgrade_set_fname(self, fname, obj):
+        self.root.ids.firmware_filename.text = fname
+
+    def upgrade_firmware(self):
+        if not self.upgrade_dialog:
+            self.upgrade_dialog = MDDialog(
+                text="Esta seguro que desea actualizar el firmware?",
+                buttons=[
+                    
+                    MDFlatButton(
+                        text="Cancelar", 
+                        text_color=self.theme_cls.primary_color, 
+                        on_release = self.close_upgrade_dialog
+                    ),
+                    MDRaisedButton(               
+                        text="Aceptar", 
+                        on_release=self.start_upgrade
+                    ),
+                ],
+            )
+
+        self.upgrade_dialog.set_normal_height()
+        self.upgrade_dialog.open()
+
+    def close_upgrade_dialog(self, inst):
+        self.upgrade_dialog.dismiss()
+
+    def start_upgrade(self, inst):
+        self.upgrade_dialog.dismiss()
+
+        local_path = str(pathlib.Path().absolute())
+        filename = os.path.join(local_path, "firmware/" +self.root.ids.firmware_filename.text)
+        
+        try:
+            self.ih = IntelHex()
+            self.ih.fromfile(filename, format='hex')
+        except FileNotFoundError:
+            self.root.ids.status.text = "No se encontro el archivo"
+            return
+        except AddressOverlapError:
+            self.root.ids.status.text = "Archivo invalido"
+            return
+
+        # Desactiva el boton de actualizar para evitar interrupciones
+        self.root.ids.upgrade_button.disabled = True
+
+        # Cierra la conexion de datos y detiene la deteccion automatica de dispositivos.
+        self.conn_event.cancel()
+        self.device_close()
+        self.conn_state = DEVICE_CLOSE
+        
+        """The firmware update is done in a worker thread because the main 
+           thread in Kivy is in charge of updating the widgets."""
+        self.root.ids.progress.value = 0
+        self.working_thread = threading.Thread(target=self.thread_flash)
+        self.working_thread.start()
+
+    def thread_flash(self):
+        """If the communication with the bootloader through the serial port could be
+           established, obtains the information of the processor and the bootloader."""
+        res_val = False
+
+        """First you have to select the communication protocol used by the bootloader of 
+        the Arduino board. The Stk500V1 is the one used by the Nano or Uno, and depending 
+        on the Old or New version, the communication speed varies, for the new one you 
+        have to use 115200 and for the old 57600.
+        
+        The communication protocol for boards based on Mega 2560 is Stk500v2 at 115200."""
+        prg = self.ab.select_programmer("Stk500v1")
+
+        if prg.open(speed=115200):
+            if not prg.board_request():
+                self.progress_queue.put(["board_request"])
+                Clock.schedule_once(self.progress_callback, 1 / 1000)
+                return
+
+            if not prg.cpu_signature():
+                self.progress_queue.put(["cpu_signature"])
+                Clock.schedule_once(self.progress_callback, 1 / 1000)
+                return
+
+            """Iterate the firmware file into chunks of the page size in bytes, and 
+               use the write flash command to update the cpu."""
+            for address in range(0, self.ih.maxaddr(), self.ab.cpu_page_size):
+                buffer = self.ih.tobinarray(start=address, size=self.ab.cpu_page_size)
+                res_val = prg.write_memory(buffer, address)
+                if not res_val:
+                    break
+
+                self.progress_queue.put(["write", address / self.ih.maxaddr()])
+                Clock.schedule_once(self.progress_callback, 1 / 1000)
+
+            """If the write was successful, re-iterate the firmware file, and use the 
+               read flash command to update and compare them."""
+            if res_val:
+                for address in range(0, self.ih.maxaddr(), self.ab.cpu_page_size):
+                    buffer = self.ih.tobinarray(start=address, size=self.ab.cpu_page_size)
+                    read_buffer = prg.read_memory(address, self.ab.cpu_page_size)
+                    if not len(read_buffer) or (buffer != read_buffer):
+                        res_val = False
+                        break
+
+                    self.progress_queue.put(["read", address / self.ih.maxaddr()])
+                    Clock.schedule_once(self.progress_callback, 1 / 1000)
+
+            self.progress_queue.put(["result", "ok" if res_val else "error", address])
+            Clock.schedule_once(self.progress_callback, 1 / 1000)
+
+            prg.leave_bootloader()
+
+            prg.close()
+        else:
+            self.progress_queue.put(["open_error"])
+            Clock.schedule_once(self.progress_callback, 1 / 1000)
+
+    def progress_callback(self, dt):
+        """In kivy only the main thread can update the widgets. Schedule a clock
+           event to read the message from the queue and update the progress."""
+        value = self.progress_queue.get()
+
+        if value[0] == "open_error":
+            self.root.ids.status.text = "Error conectado."
+    
+        if value[0] == "board_request" or value[0] == "cpu_signature":
+            self.root.ids.status.text = "Error en el bootloader"
+    
+        if value[0] == "write":
+            self.root.ids.status.text = "Escribiendo flash %{:.2f}".format(value[1]*100)
+            self.root.ids.progress.value = value[1]
+
+        if value[0] == "read":
+            self.root.ids.status.text = "Verificando flash %{:.2f}".format(value[1]*100)
+            self.root.ids.progress.value = value[1]
+
+        if value[0] == "result" and value[1] == "ok":
+            self.root.ids.status.text = "Actualización exitosa"
+            self.root.ids.progress.value = 1
+    
+        if value[0] == "result" and value[1] == "error":
+            self.root.ids.status.text = "Error actualizando"
+            
+
+        # Si es un mensaje de finalizacion activa la conexion automatica.
+        if (value[0] != "write") and (value[0] != "read"):
+            self.conn_event = Clock.schedule_once(self.conn_callback, 1/100)
+            # Cuando finaliza la actualizacion reactiva el boton de actualizar
+            self.root.ids.upgrade_button.disabled = False
 
     def on_plot(self):
         if platform == 'android':
