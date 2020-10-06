@@ -165,7 +165,7 @@ Screen:
                         pos_hint: {"top": 1}
                         TwoLineAvatarListItem:
                             text: "Versión de la APP"
-                            secondary_text: "2.4"
+                            secondary_text: "2.5"
 
                             ImageLeftWidget:
                                 size: "56dp", "56dp"
@@ -174,7 +174,7 @@ Screen:
                         TwoLineAvatarListItem:
                             id: firmware_version
                             text: "Versión del firmware"
-                            secondary_text: "1.9"
+                            secondary_text: "---"
 
                             ImageLeftWidget:
                                 size: "56dp", "56dp"
@@ -511,7 +511,6 @@ Screen:
                 screen_manager: screen_manager.__self__
                 nav_drawer: nav_drawer.__self__
                 toolbar: toolbar.__self__
-                #buzzer_enable: buzzer_enable.__self__
 
 <ProgressDialog>
     orientation: "vertical"
