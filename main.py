@@ -718,15 +718,19 @@ class ItkAware(MDApp):
         The communication protocol for boards based on Mega 2560 is Stk500v2 at 115200."""
         prg = self.ab.select_programmer("Stk500v1")
 
+        prg.close()
+
         if prg.open(speed=115200):
             if not prg.board_request():
                 self.progress_queue.put(["board_request"])
                 Clock.schedule_once(self.progress_callback, 1 / 1000)
+                prg.close()
                 return
 
             if not prg.cpu_signature():
                 self.progress_queue.put(["cpu_signature"])
                 Clock.schedule_once(self.progress_callback, 1 / 1000)
+                pr.close()
                 return
 
             """Iterate the firmware file into chunks of the page size in bytes, and 
@@ -769,7 +773,7 @@ class ItkAware(MDApp):
         value = self.progress_queue.get()
 
         if value[0] == "open_error":
-            self.root.ids.status.text = "Error conectado."
+            self.root.ids.status.text = "Error conectando."
     
         if value[0] == "board_request" or value[0] == "cpu_signature":
             self.root.ids.status.text = "Error en el bootloader"
